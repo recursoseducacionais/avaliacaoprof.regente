@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Avaliação Pedagógica — Professor Regente</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   VARIÁVEIS E RESET
+============================================================ */
+:root {
+  --verde-escuro: #1B4D3E;
+  --verde-medio: #2D7A5F;
+  --verde-claro: #C8E6DA;
+  --verde-palido: #EDF7F2;
+  --creme: #FAFAF5;
+  --creme-escuro: #F0EFE6;
+  --laranja: #D4621A;
+  --laranja-claro: #FFF0E6;
+  --cinza-texto: #2E2E2E;
+  --cinza-medio: #5A5A5A;
+  --cinza-borda: #D8D8D0;
+  --azul-tag: #1A3A5C;
+  --azul-claro: #E8F0F8;
+  --roxo: #4A2C6E;
+  --roxo-claro: #F0EBF8;
+  --amarelo: #C49A00;
+  --amarelo-claro: #FFF8DC;
+  --vermelho-claro: #FFF0F0;
+  --vermelho: #B03030;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--creme); color: var(--cinza-texto); font-size: 15px; line-height: 1.7; }
+
+/* ============================================================
+   TELA DE SELEÇÃO DE MÓDULO
+============================================================ */
+#tela-modulos {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  background: var(--verde-escuro);
+}
+#tela-modulos .tm-titulo {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  color: white;
+  text-align: center;
+  margin-bottom: 8px;
+  line-height: 1.15;
+}
+#tela-modulos .tm-sub {
+  font-size: 0.88rem;
+  color: rgba(255,255,255,0.55);
+  text-align: center;
+  margin-bottom: 48px;
+  max-width: 520px;
+}
+.modulo-cards {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 860px;
+  width: 100%;
+}
+.modulo-card {
+  background: white;
+  border-radius: 20px;
+  padding: 36px 32px;
+  flex: 1;
+  min-width: 280px;
+  max-width: 380px;
+  cursor: pointer;
+  transition: all 0.25s;
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+.modulo-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+}
+.modulo-card.m1::before { background: var(--verde-medio); }
+.modulo-card.m2::before { background: var(--laranja); }
+.modulo-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.2); }
+.modulo-card .mc-num {
+  font-family: 'DM Serif Display', serif;
+  font-size: 3rem;
+  line-height: 1;
+  margin-bottom: 16px;
+}
+.m1 .mc-num { color: var(--verde-claro); }
+.m2 .mc-num { color: #FFD4B0; }
+.modulo-card h3 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.2rem;
+  color: var(--verde-escuro);
+  margin-bottom: 10px;
+  line-height: 1.2;
+}
+.modulo-card p {
+  font-size: 0.83rem;
+  color: var(--cinza-medio);
+  line-height: 1.65;
+  margin-bottom: 24px;
+}
+.modulo-card .mc-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 28px;
+}
+.mc-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+.m1 .mc-tag { background: var(--verde-palido); color: var(--verde-medio); }
+.m2 .mc-tag { background: var(--laranja-claro); color: var(--laranja); }
+.modulo-card .mc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-radius: 50px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.m1 .mc-btn { background: var(--verde-escuro); color: white; }
+.m2 .mc-btn { background: var(--laranja); color: white; }
+.modulo-card .mc-btn:hover { opacity: 0.88; }
+
+/* ============================================================
+   ESTRUTURA COMPARTILHADA (SIDEBAR + MAIN)
+============================================================ */
+#app-modulo {
+  display: none;
+  min-height: 100vh;
+}
+#sidebar {
+  position: fixed; left: 0; top: 0;
+  width: 240px; height: 100vh;
+  overflow-y: auto; z-index: 100;
+  display: flex; flex-direction: column;
+  transition: transform 0.3s;
+}
+.sidebar-logo { padding: 24px 20px 18px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.sidebar-logo .sl-label { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 5px; }
+.sidebar-logo h2 { font-family: 'DM Serif Display', serif; font-size: 0.95rem; line-height: 1.3; }
+.sidebar-logo .sl-modulo { font-size: 0.68rem; margin-top: 6px; opacity: 0.5; }
+#sidebar nav { padding: 10px 0; flex: 1; }
+#sidebar nav button {
+  display: flex; align-items: flex-start; gap: 10px;
+  width: 100%; text-align: left;
+  padding: 9px 18px; background: none; border: none; cursor: pointer;
+  font-size: 0.77rem; font-weight: 500; font-family: 'DM Sans', sans-serif;
+  transition: all 0.2s; border-left: 3px solid transparent; line-height: 1.35;
+}
+#sidebar nav button .num { font-family: 'DM Serif Display', serif; font-size: 0.68rem; min-width: 18px; margin-top: 1px; opacity: 0.5; }
+.sidebar-footer { padding: 14px 18px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.65rem; line-height: 1.55; opacity: 0.35; }
+.sidebar-voltar {
+  margin: 10px 18px 0;
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.6);
+  border-radius: 8px; padding: 8px 12px;
+  font-size: 0.75rem; font-weight: 600; cursor: pointer;
+  transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+}
+.sidebar-voltar:hover { background: rgba(255,255,255,0.15); color: white; }
+
+/* Módulo 1 — verde */
+.sb-m1 { background: var(--verde-escuro); color: white; }
+.sb-m1 .sl-label { color: var(--verde-claro); }
+.sb-m1 nav button { color: rgba(255,255,255,0.6); }
+.sb-m1 nav button:hover, .sb-m1 nav button.ativo { color: white; background: rgba(255,255,255,0.08); border-left-color: #7FD4B0; }
+
+/* Módulo 2 — escuro quente */
+.sb-m2 { background: #2A1A0E; color: white; }
+.sb-m2 .sl-label { color: #FFD4B0; }
+.sb-m2 nav button { color: rgba(255,255,255,0.6); }
+.sb-m2 nav button:hover, .sb-m2 nav button.ativo { color: white; background: rgba(255,255,255,0.08); border-left-color: var(--laranja); }
+
+#main { margin-left: 240px; min-height: 100vh; }
+#menu-btn {
+  display: none; position: fixed; top: 14px; left: 14px; z-index: 200;
+  border: none; border-radius: 8px; width: 40px; height: 40px;
+  font-size: 1.2rem; cursor: pointer; align-items: center; justify-content: center;
+}
+
+/* ============================================================
+   SEÇÕES
+============================================================ */
+.section { display: none; animation: fadeUp 0.3s ease; }
+.section.ativo { display: block; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ============================================================
+   CAPA MÓDULO 1
+============================================================ */
+#m1-capa { min-height: 100vh; display: flex; align-items: stretch; }
+.capa-esq { background: var(--verde-escuro); width: 55%; padding: 72px 56px; display: flex; flex-direction: column; justify-content: space-between; }
+.capa-dir { background: var(--amarelo-claro); width: 45%; padding: 64px 48px; display: flex; flex-direction: column; justify-content: center; }
+.capa-tag { display: inline-block; background: var(--verde-claro); color: var(--verde-escuro); font-size: 0.63rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 5px 12px; border-radius: 20px; width: fit-content; margin-bottom: 28px; }
+.capa-esq h1 { font-family: 'DM Serif Display', serif; font-size: clamp(1.8rem, 3vw, 3rem); color: white; line-height: 1.1; margin-bottom: 18px; }
+.capa-esq h1 em { font-style: italic; color: #7FD4B0; }
+.capa-esq .sub { font-size: 0.88rem; color: rgba(255,255,255,0.55); line-height: 1.7; max-width: 380px; margin-bottom: 36px; }
+.capa-esq .btn-start { background: white; color: var(--verde-escuro); border: none; padding: 13px 30px; border-radius: 50px; font-family: 'DM Sans',sans-serif; font-size: 0.86rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+.capa-esq .btn-start:hover { background: var(--verde-claro); }
+.capa-dir h3 { font-family: 'DM Serif Display', serif; font-size: 1.05rem; color: var(--verde-escuro); margin-bottom: 18px; }
+.indice { list-style: none; padding: 0; }
+.indice li { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.07); font-size: 0.8rem; color: var(--cinza-medio); cursor: pointer; transition: color 0.15s; }
+.indice li:hover { color: var(--verde-escuro); }
+.indice li .n { font-family: 'DM Serif Display', serif; font-size: 0.9rem; color: var(--verde-medio); min-width: 20px; }
+
+/* ============================================================
+   CABEÇALHO DE SEÇÃO
+============================================================ */
+.sec-top { padding: 52px 64px 36px; color: white; }
+.sec-top.verde { background: var(--verde-escuro); }
+.sec-top.laranja { background: #2A1A0E; }
+.sec-top .breadcrumb { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 10px; }
+.sec-top.verde .breadcrumb { color: #7FD4B0; }
+.sec-top.laranja .breadcrumb { color: #FFD4B0; }
+.sec-top h2 { font-family: 'DM Serif Display', serif; font-size: clamp(1.6rem, 2.8vw, 2.4rem); line-height: 1.1; margin-bottom: 12px; }
+.sec-top .lead { font-size: 0.91rem; color: rgba(255,255,255,0.65); line-height: 1.7; max-width: 600px; }
+.sec-body { padding: 48px 64px 80px; background: var(--creme); }
+
+/* ============================================================
+   COMPONENTES COMPARTILHADOS
+============================================================ */
+h3.tb { font-family: 'DM Serif Display', serif; font-size: 1.2rem; color: var(--verde-escuro); margin: 32px 0 14px; padding-bottom: 8px; border-bottom: 2px solid var(--verde-claro); }
+h3.tb.laranja-tb { color: var(--laranja); border-bottom-color: #FFD4B0; }
+h4.sub { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--verde-medio); margin: 24px 0 10px; }
+h4.sub.laranja-sub { color: var(--laranja); }
+p.texto { font-size: 0.89rem; color: var(--cinza-medio); line-height: 1.8; max-width: 700px; margin-bottom: 12px; }
+
+.alerta { border-radius: 10px; padding: 16px 20px; margin: 20px 0; display: flex; gap: 12px; align-items: flex-start; font-size: 0.86rem; line-height: 1.7; }
+.alerta .ico { font-size: 1.1rem; flex-shrink: 0; margin-top: 2px; }
+.alerta p { margin: 0; }
+.alerta-verde { background: var(--verde-palido); border-left: 4px solid var(--verde-medio); }
+.alerta-laranja { background: var(--laranja-claro); border-left: 4px solid var(--laranja); }
+.alerta-azul { background: var(--azul-claro); border-left: 4px solid var(--azul-tag); }
+.alerta-roxo { background: var(--roxo-claro); border-left: 4px solid var(--roxo); }
+.alerta-amarelo { background: var(--amarelo-claro); border-left: 4px solid var(--amarelo); }
+
+.dim-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 18px; }
+.dim-card { background: white; border-radius: 12px; padding: 20px 22px; border: 1.5px solid var(--cinza-borda); transition: box-shadow 0.2s, transform 0.2s; }
+.dim-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); transform: translateY(-2px); }
+.dim-card .dc-h { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+.dim-card .dc-n { font-family: 'DM Serif Display', serif; font-size: 1.5rem; color: var(--verde-claro); line-height: 1; flex-shrink: 0; }
+.dim-card .dc-t { font-weight: 700; font-size: 0.86rem; color: var(--verde-escuro); line-height: 1.3; }
+.dim-card .dc-tag { display: inline-block; font-size: 0.58rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 8px; border-radius: 10px; margin-top: 3px; }
+.dim-card ul { list-style: none; padding: 0; }
+.dim-card ul li { font-size: 0.81rem; color: var(--cinza-medio); padding: 4px 0; border-bottom: 1px solid var(--creme-escuro); line-height: 1.5; display: flex; gap: 6px; }
+.dim-card ul li::before { content: '–'; color: var(--cinza-borda); flex-shrink: 0; }
+
+.check-lista { list-style: none; padding: 0; margin: 14px 0; }
+.check-lista li { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--creme-escuro); font-size: 0.87rem; line-height: 1.6; color: var(--cinza-medio); cursor: pointer; }
+.ck-box { width: 20px; height: 20px; border-radius: 5px; border: 2px solid var(--cinza-borda); flex-shrink: 0; margin-top: 2px; transition: all 0.15s; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; }
+.ck-box.on { background: var(--verde-medio); border-color: var(--verde-medio); color: white; }
+.ck-box.on::after { content: '✓'; }
+
+.tabela-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 18px 0; }
+.t2c { border-radius: 12px; padding: 20px 22px; }
+.t2c h4 { font-size: 0.84rem; font-weight: 700; margin-bottom: 12px; }
+.t2c ul { list-style: none; padding: 0; }
+.t2c ul li { font-size: 0.82rem; padding: 5px 0; border-bottom: 1px solid rgba(0,0,0,0.06); line-height: 1.5; color: #444; display: flex; gap: 8px; }
+.t2c ul li span { flex-shrink: 0; opacity: 0.4; }
+
+.nav-bottom { display: flex; justify-content: space-between; align-items: center; padding: 22px 64px; border-top: 1px solid var(--creme-escuro); background: var(--creme); }
+.btn-nav { display: flex; align-items: center; gap: 8px; background: none; border: 1.5px solid var(--cinza-borda); border-radius: 50px; padding: 8px 20px; font-family: 'DM Sans',sans-serif; font-size: 0.81rem; font-weight: 600; cursor: pointer; color: var(--cinza-texto); transition: all 0.2s; }
+.btn-nav:hover { background: var(--verde-escuro); color: white; border-color: var(--verde-escuro); }
+.btn-nav:disabled { opacity: 0.25; cursor: default; pointer-events: none; }
+.prog { font-size: 0.73rem; color: #999; font-weight: 500; }
+
+/* Roteiro expansível */
+.rot-bloco { background: white; border-radius: 12px; border: 1.5px solid var(--cinza-borda); overflow: hidden; margin-bottom: 14px; }
+.rot-header { padding: 13px 20px; display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; transition: background 0.15s; }
+.rot-header:hover { background: var(--creme-escuro); }
+.rot-header .rn { font-family: 'DM Serif Display', serif; font-size: 1.05rem; min-width: 26px; flex-shrink: 0; }
+.rot-header .rt { font-weight: 700; font-size: 0.88rem; flex: 1; }
+.rot-header .rs { font-size: 0.75rem; transition: transform 0.2s; color: var(--cinza-medio); }
+.rot-header.aberto .rs { transform: rotate(180deg); }
+.rot-body { display: none; padding: 0 20px 20px; border-top: 1px solid var(--creme-escuro); }
+.rot-body.aberto { display: block; }
+.perg-item { padding: 11px 0; border-bottom: 1px solid var(--creme-escuro); }
+.perg-item:last-child { border-bottom: none; }
+.perg-item .pq { font-size: 0.84rem; font-weight: 600; color: var(--cinza-texto); margin-bottom: 6px; display: flex; gap: 7px; }
+.perg-item .pq::before { content: '→'; color: var(--verde-medio); flex-shrink: 0; }
+.campo { width: 100%; min-height: 50px; background: var(--creme); border: 1.5px solid var(--cinza-borda); border-radius: 7px; padding: 7px 11px; font-family: 'DM Sans',sans-serif; font-size: 0.81rem; color: var(--cinza-texto); resize: vertical; transition: border-color 0.15s; line-height: 1.6; }
+.campo:focus { outline: none; border-color: var(--verde-medio); background: white; }
+.campo::placeholder { color: #BBB; font-style: italic; }
+
+/* Escala */
+.escala { display: flex; margin: 14px 0 6px; border-radius: 8px; overflow: hidden; }
+.escala-item { flex: 1; padding: 9px 6px; text-align: center; font-size: 0.68rem; font-weight: 700; line-height: 1.3; cursor: default; }
+
+/* Nota anedótica */
+.nota-tpl { background: white; border: 1.5px solid var(--cinza-borda); border-radius: 12px; overflow: hidden; margin-top: 18px; }
+.nt-head { background: var(--verde-escuro); color: white; padding: 10px 18px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; }
+.nt-campos { padding: 14px 18px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; border-bottom: 1px solid var(--creme-escuro); }
+.nt-campo label { display: block; font-size: 0.65rem; font-weight: 700; color: var(--verde-medio); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; }
+.nt-campo input, .nt-campo select { width: 100%; padding: 5px 9px; border: 1.5px solid var(--cinza-borda); border-radius: 6px; font-family: 'DM Sans',sans-serif; font-size: 0.81rem; background: var(--creme); color: var(--cinza-texto); }
+.nt-campo input:focus, .nt-campo select:focus { outline: none; border-color: var(--verde-medio); }
+.nt-body { padding: 14px 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.nt-body-full { padding: 0 18px 14px; }
+.nt-area label { display: block; font-size: 0.65rem; font-weight: 700; color: var(--verde-medio); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px; }
+.nt-area textarea { width: 100%; min-height: 65px; padding: 7px 10px; border: 1.5px solid var(--cinza-borda); border-radius: 7px; font-family: 'DM Sans',sans-serif; font-size: 0.81rem; background: var(--creme); resize: vertical; line-height: 1.6; }
+.nt-area textarea:focus { outline: none; border-color: var(--verde-medio); background: white; }
+
+/* ============================================================
+   MÓDULO 2 — FORMULÁRIO DE ENCAMINHAMENTO
+============================================================ */
+/* Capa M2 */
+#m2-capa { min-height: 100vh; display: flex; align-items: stretch; }
+.capa-esq-laranja { background: #2A1A0E; width: 55%; padding: 72px 56px; display: flex; flex-direction: column; justify-content: space-between; }
+.capa-dir-laranja { background: #FFF0E6; width: 45%; padding: 64px 48px; display: flex; flex-direction: column; justify-content: center; }
+.capa-tag-laranja { display: inline-block; background: #FFD4B0; color: var(--laranja); font-size: 0.63rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 5px 12px; border-radius: 20px; width: fit-content; margin-bottom: 28px; }
+.capa-esq-laranja h1 { font-family: 'DM Serif Display', serif; font-size: clamp(1.8rem, 3vw, 3rem); color: white; line-height: 1.1; margin-bottom: 18px; }
+.capa-esq-laranja h1 em { font-style: italic; color: #FFD4B0; }
+.capa-esq-laranja .sub { font-size: 0.88rem; color: rgba(255,255,255,0.55); line-height: 1.7; max-width: 380px; margin-bottom: 36px; }
+.btn-start-laranja { background: var(--laranja); color: white; border: none; padding: 13px 30px; border-radius: 50px; font-family: 'DM Sans',sans-serif; font-size: 0.86rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+.btn-start-laranja:hover { opacity: 0.88; }
+.capa-dir-laranja h3 { font-family: 'DM Serif Display', serif; font-size: 1.05rem; color: var(--laranja); margin-bottom: 18px; }
+.indice-laranja { list-style: none; padding: 0; }
+.indice-laranja li { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.08); font-size: 0.8rem; color: var(--cinza-medio); cursor: pointer; transition: color 0.15s; }
+.indice-laranja li:hover { color: var(--laranja); }
+.indice-laranja li .n { font-family: 'DM Serif Display', serif; font-size: 0.9rem; color: var(--laranja); min-width: 20px; }
+
+/* Formulário */
+.form-bloco { background: white; border-radius: 14px; border: 1.5px solid var(--cinza-borda); padding: 28px 32px; margin-bottom: 20px; }
+.form-bloco h3 { font-family: 'DM Serif Display', serif; font-size: 1.1rem; color: var(--laranja); margin-bottom: 18px; padding-bottom: 10px; border-bottom: 2px solid #FFD4B0; }
+.form-grid { display: grid; gap: 14px; }
+.form-grid-2 { grid-template-columns: 1fr 1fr; }
+.form-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+.form-grupo label { display: block; font-size: 0.68rem; font-weight: 700; color: var(--laranja); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px; }
+.form-grupo label .obrig { color: var(--vermelho); margin-left: 2px; }
+.form-input { width: 100%; padding: 8px 12px; border: 1.5px solid var(--cinza-borda); border-radius: 8px; font-family: 'DM Sans',sans-serif; font-size: 0.86rem; color: var(--cinza-texto); background: var(--creme); transition: border-color 0.15s; }
+.form-input:focus { outline: none; border-color: var(--laranja); background: white; }
+.form-input::placeholder { color: #BBB; font-style: italic; }
+.form-textarea { width: 100%; min-height: 80px; padding: 8px 12px; border: 1.5px solid var(--cinza-borda); border-radius: 8px; font-family: 'DM Sans',sans-serif; font-size: 0.86rem; color: var(--cinza-texto); background: var(--creme); resize: vertical; line-height: 1.65; transition: border-color 0.15s; }
+.form-textarea:focus { outline: none; border-color: var(--laranja); background: white; }
+.form-textarea::placeholder { color: #BBB; font-style: italic; }
+
+/* Dimensões do formulário */
+.dim-form-bloco { background: white; border-radius: 12px; border: 1.5px solid var(--cinza-borda); overflow: hidden; margin-bottom: 14px; }
+.dim-form-header { padding: 12px 20px; display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; transition: background 0.15s; background: white; }
+.dim-form-header:hover { background: var(--laranja-claro); }
+.dim-form-header .dfn { font-family: 'DM Serif Display', serif; font-size: 1rem; color: var(--laranja); min-width: 24px; }
+.dim-form-header .dft { font-weight: 700; font-size: 0.87rem; flex: 1; }
+.dim-form-header .dfs { font-size: 0.75rem; color: var(--cinza-medio); transition: transform 0.2s; }
+.dim-form-header.aberto .dfs { transform: rotate(180deg); }
+.dim-form-body { display: none; padding: 0 20px 20px; border-top: 1px solid var(--creme-escuro); }
+.dim-form-body.aberto { display: block; }
+
+/* Nível de apoio */
+.nivel-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; border-radius: 8px; overflow: hidden; margin: 8px 0 4px; }
+.nivel-item { padding: 8px 4px; text-align: center; font-size: 0.65rem; font-weight: 700; line-height: 1.3; cursor: pointer; transition: opacity 0.15s; user-select: none; border: 2px solid transparent; }
+.nivel-item:hover { opacity: 0.85; }
+.nivel-item.selecionado { border-color: var(--cinza-texto); opacity: 1 !important; }
+.ni-1 { background: #1B4D3E; color: white; }
+.ni-2 { background: #2D7A5F; color: white; }
+.ni-3 { background: #5BAA8A; color: white; }
+.ni-4 { background: #C8E6DA; color: var(--verde-escuro); }
+.ni-5 { background: #EDF7F2; color: var(--verde-escuro); }
+
+/* Botão PDF */
+.barra-pdf {
+  position: sticky; bottom: 0; left: 0; right: 0;
+  background: var(--laranja); padding: 16px 64px;
+  display: flex; align-items: center; justify-content: space-between;
+  z-index: 50; box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+}
+.barra-pdf .bp-texto { font-size: 0.85rem; color: white; font-weight: 600; }
+.barra-pdf .bp-sub { font-size: 0.73rem; color: rgba(255,255,255,0.65); margin-top: 2px; }
+.btn-pdf {
+  background: white; color: var(--laranja); border: none;
+  padding: 12px 28px; border-radius: 50px;
+  font-family: 'DM Sans',sans-serif; font-size: 0.88rem; font-weight: 800;
+  cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px;
+  white-space: nowrap;
+}
+.btn-pdf:hover { background: var(--amarelo-claro); }
+
+/* Nav módulo 2 */
+.btn-nav-laranja { display: flex; align-items: center; gap: 8px; background: none; border: 1.5px solid var(--cinza-borda); border-radius: 50px; padding: 8px 20px; font-family: 'DM Sans',sans-serif; font-size: 0.81rem; font-weight: 600; cursor: pointer; color: var(--cinza-texto); transition: all 0.2s; }
+.btn-nav-laranja:hover { background: var(--laranja); color: white; border-color: var(--laranja); }
+.btn-nav-laranja:disabled { opacity: 0.25; cursor: default; pointer-events: none; }
+
+/* ============================================================
+   IMPRESSÃO / PDF
+============================================================ */
+@media print {
+  #tela-modulos, #sidebar, #menu-btn, .nav-bottom, .barra-pdf,
+  .sec-top, .rot-header, .dim-form-header,
+  .sidebar-voltar, .btn-nav, .btn-nav-laranja,
+  #modulo1-secoes { display: none !important; }
+
+  #app-modulo { display: block !important; }
+  #main { margin-left: 0 !important; }
+  #modulo2-secoes { display: block !important; }
+
+  .section { display: none !important; }
+  .section.pdf-print { display: block !important; }
+
+  .rot-body, .dim-form-body { display: block !important; }
+
+  .form-bloco, .dim-form-bloco, .dim-card { break-inside: avoid; }
+
+  body { font-size: 11.5px; background: white; color: #1A1A1A; }
+
+  .pdf-cabecalho { display: block !important; }
+
+  .form-input, .form-textarea, .campo { background: white !important; border: 1px solid #999 !important; }
+
+  .nivel-item { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .nivel-item.selecionado { outline: 3px solid #333 !important; }
+
+  input[type="checkbox"], input[type="radio"] { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  .nivel-grid { break-inside: avoid; }
+
+  @page { margin: 18mm 16mm; size: A4; }
+}
+
+.pdf-cabecalho {
+  display: none;
+  padding: 0 0 24px;
+  border-bottom: 3px solid var(--laranja);
+  margin-bottom: 24px;
+}
+.pdf-cabecalho h1 { font-family: 'DM Serif Display', serif; font-size: 1.5rem; color: var(--laranja); margin-bottom: 4px; }
+.pdf-cabecalho p { font-size: 0.78rem; color: #666; }
+
+/* ============================================================
+   MOBILE
+============================================================ */
+@media (max-width: 800px) {
+  #sidebar { transform: translateX(-100%); }
+  #sidebar.open { transform: translateX(0); }
+  #menu-btn { display: flex; }
+  #main { margin-left: 0; }
+  .sec-top { padding: 52px 24px 32px; }
+  .sec-body { padding: 36px 24px 60px; }
+  .nav-bottom { padding: 18px 24px; }
+  .barra-pdf { padding: 14px 24px; }
+  .capa-esq, .capa-esq-laranja { width: 100%; padding: 56px 28px; }
+  .capa-dir, .capa-dir-laranja { display: none; }
+  #m1-capa, #m2-capa { flex-direction: column; }
+  .tabela-2col { grid-template-columns: 1fr; }
+  .form-grid-2, .form-grid-3 { grid-template-columns: 1fr; }
+  .nivel-grid { grid-template-columns: repeat(5, 1fr); }
+  .nt-campos { grid-template-columns: 1fr; }
+  .nt-body { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     TELA INICIAL — SELEÇÃO DE MÓDULO
+============================================================ -->
+<div id="tela-modulos">
+  <p class="tm-sub" style="margin-bottom:12px; font-size:0.65rem; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.4);">Avaliação Pedagógica · Professor Regente</p>
+  <h1 class="tm-titulo">Por onde você quer começar?</h1>
+  <p class="tm-sub">Este material está dividido em dois módulos independentes. Você pode acessá-los em qualquer ordem.</p>
+  <div class="modulo-cards">
+    <div class="modulo-card m1" onclick="abrirModulo(1)">
+      <div class="mc-num">01</div>
+      <h3>Guia de orientações para a avaliação pedagógica</h3>
+      <p>Aprenda o que observar, como registrar e como preparar suas contribuições para o Estudo de Caso — com fundamentação na LBI e no Decreto nº 12.686/2025.</p>
+      <div class="mc-tags">
+        <span class="mc-tag">Orientações práticas</span>
+        <span class="mc-tag">Legislação</span>
+        <span class="mc-tag">Roteiros de observação</span>
+        <span class="mc-tag">Nota anedótica</span>
+      </div>
+      <button class="mc-btn">Acessar guia →</button>
+    </div>
+    <div class="modulo-card m2" onclick="abrirModulo(2)">
+      <div class="mc-num">02</div>
+      <h3>Formulário de encaminhamento ao AEE</h3>
+      <p>Preencha os dados coletados durante o período de observação e gere um PDF formatado para encaminhar à professora do AEE.</p>
+      <div class="mc-tags">
+        <span class="mc-tag">Preenchível</span>
+        <span class="mc-tag">Gerar PDF</span>
+        <span class="mc-tag">Encaminhamento ao AEE</span>
+      </div>
+      <button class="mc-btn">Preencher formulário →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     APP (SIDEBAR + MAIN)
+============================================================ -->
+<button id="menu-btn" onclick="toggleMenu()">☰</button>
+
+<div id="app-modulo">
+  <aside id="sidebar">
+    <div class="sidebar-logo">
+      <div class="sl-label">Avaliação Pedagógica</div>
+      <h2 id="sb-titulo">Guia de Orientações</h2>
+      <div class="sl-modulo" id="sb-modulo-label">Módulo 01</div>
+    </div>
+    <nav id="nav-links"></nav>
+    <button class="sidebar-voltar" onclick="voltarInicio()">← Trocar módulo</button>
+    <div class="sidebar-footer">
+      Fundamentado na LBI (Lei nº 13.146/2015)<br>
+      e no Decreto nº 12.686/2025<br>
+      (atualizado pelo Decreto nº 12.773/2025)
+    </div>
+  </aside>
+
+  <main id="main">
+    <!-- Seções do Módulo 1 -->
+    <div id="modulo1-secoes">
+
+      <!-- M1-0: Capa -->
+      <section class="section m1-sec" id="m1s0">
+        <div id="m1-capa">
+          <div class="capa-esq">
+            <div>
+              <div class="capa-tag">Módulo 01 · Guia de orientações</div>
+              <h1>Como fazer uma<br><em>avaliação pedagógica</em><br>que realmente serve</h1>
+              <p class="sub">Um guia prático para o professor regente observar, registrar e compreender o desempenho de estudantes público da educação especial — fundamentado na LBI e no Decreto nº 12.686/2025.</p>
+              <button class="btn-start" onclick="irM1(1)">Começar →</button>
+            </div>
+            <p style="font-size:0.68rem; color:rgba(255,255,255,0.3); margin-top:32px;">LBI · Decreto nº 12.686/2025 · Decreto nº 12.773/2025</p>
+          </div>
+          <div class="capa-dir">
+            <h3>O que você vai encontrar</h3>
+            <ol class="indice">
+              <li onclick="irM1(1)"><span class="n">01</span> O que é e por que importa</li>
+              <li onclick="irM1(2)"><span class="n">02</span> O que a lei determina</li>
+              <li onclick="irM1(3)"><span class="n">03</span> As dimensões da avaliação</li>
+              <li onclick="irM1(4)"><span class="n">04</span> Roteiro de observação</li>
+              <li onclick="irM1(5)"><span class="n">05</span> A nota anedótica</li>
+              <li onclick="irM1(6)"><span class="n">06</span> Avaliação de desempenho</li>
+              <li onclick="irM1(7)"><span class="n">07</span> Erros a evitar</li>
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      <!-- M1-1 -->
+      <section class="section m1-sec" id="m1s1">
+        <div class="sec-top verde">
+          <div class="breadcrumb">01 · Fundamentos</div>
+          <h2>O que é a avaliação pedagógica<br>e por que ela importa</h2>
+          <p class="lead">Antes de qualquer roteiro, é preciso entender o que se está fazendo — e como isso impacta diretamente o atendimento ao estudante.</p>
+        </div>
+        <div class="sec-body">
+          <h3 class="tb">Avaliação pedagógica não é prova</h3>
+          <p class="texto">Ela é um <strong>processo sistemático de observação e registro</strong> que busca responder a perguntas essenciais sobre o estudante em seu contexto real de aprendizagem.</p>
+          <div class="dim-grid">
+            <div class="dim-card"><div class="dc-h"><div class="dc-n">?</div><div><div class="dc-t">O que ele já sabe fazer?</div></div></div><ul><li>Habilidades com autonomia</li><li>Em quais contextos aparecem</li></ul></div>
+            <div class="dim-card"><div class="dc-h"><div class="dc-n">?</div><div><div class="dc-t">O que faz com apoio?</div></div></div><ul><li>O que faz com mediação</li><li>Qual tipo de apoio funciona</li></ul></div>
+            <div class="dim-card"><div class="dc-h"><div class="dc-n">?</div><div><div class="dc-t">Quais são as barreiras?</div></div></div><ul><li>Curriculares, ambientais, comunicacionais</li><li>O que impede a participação plena</li></ul></div>
+            <div class="dim-card"><div class="dc-h"><div class="dc-n">?</div><div><div class="dc-t">Qual é o próximo passo?</div></div></div><ul><li>Aprendizagens em construção</li><li>Metas razoáveis para o PEI</li></ul></div>
+          </div>
+          <div class="alerta alerta-verde" style="margin-top:28px;">
+            <span class="ico">💡</span>
+            <p>A pergunta central da psicopedagogia — <strong>"o que este estudante faz com e sem apoio?"</strong> — vem do conceito de Zona de Desenvolvimento Proximal (ZDP) de Vygotsky. É ela que orienta as metas do PEI e as estratégias de ensino.</p>
+          </div>
+          <h3 class="tb">Por que o professor regente é insubstituível</h3>
+          <p class="texto">Você observa o estudante onde mais importa para a inclusão: <strong>na sala de aula comum, com a turma, diante das demandas reais do currículo</strong>. Suas observações revelam o que nenhum outro profissional consegue ver.</p>
+          <ul class="check-lista" style="max-width:680px;">
+            <li onclick="ck(this)"><div class="ck-box"></div>Como responde a instruções coletivas</li>
+            <li onclick="ck(this)"><div class="ck-box"></div>Como se relaciona com colegas durante as atividades</li>
+            <li onclick="ck(this)"><div class="ck-box"></div>Quais tipos de tarefa geram engajamento ou frustração</li>
+            <li onclick="ck(this)"><div class="ck-box"></div>Como reage a diferentes formatos de apresentação do conteúdo</li>
+            <li onclick="ck(this)"><div class="ck-box"></div>Seu ritmo real de trabalho em condições de sala comum</li>
+            <li onclick="ck(this)"><div class="ck-box"></div>Que apoios surgem naturalmente e funcionam no cotidiano</li>
+          </ul>
+          <div class="alerta alerta-laranja" style="margin-top:24px;">
+            <span class="ico">⚠️</span>
+            <p><strong>Atenção:</strong> observações vagas como "o aluno tem dificuldade em tudo" ou "não consegue acompanhar" não geram dados úteis para o Estudo de Caso. Este guia vai ajudá-lo a observar com precisão.</p>
+          </div>
+        </div>
+        <div class="nav-bottom"><button class="btn-nav" disabled>← Anterior</button><span class="prog">1 de 7</span><button class="btn-nav" onclick="irM1(2)">Próximo →</button></div>
+      </section>
+
+      <!-- M1-2 -->
+      <section class="section m1-sec" id="m1s2">
+        <div class="sec-top verde">
+          <div class="breadcrumb">02 · Embasamento legal</div>
+          <h2>O que a lei determina<br>sobre sua participação</h2>
+          <p class="lead">Sua participação na avaliação pedagógica não é opcional — ela tem respaldo direto na legislação vigente.</p>
+        </div>
+        <div class="sec-body">
+          <h3 class="tb">LBI — Lei Brasileira de Inclusão (Lei nº 13.146/2015)</h3>
+          <div class="alerta alerta-azul"><span class="ico">📋</span><p>O <strong>Art. 28</strong> garante o direito à educação inclusiva e define que a avaliação pedagógica é o instrumento central para a garantia de apoios, adaptações razoáveis e recursos de acessibilidade — <strong>sem exigência de laudo médico</strong>.</p></div>
+          <h3 class="tb">Decreto nº 12.686/2025 e Decreto nº 12.773/2025</h3>
+          <div class="alerta alerta-verde"><span class="ico">⚖️</span><p><strong>Art. 11 — Estudo de Caso:</strong> avaliação pedagógica multidimensional e colaborativa, conduzida pelo professor de AEE, que subsidia o PAEE e o PEI. O decreto é explícito: as <strong>informações do professor regente são componente obrigatório</strong> do Estudo de Caso.</p></div>
+          <div class="alerta alerta-roxo"><span class="ico">📌</span><p><strong>Art. 12 (Decreto nº 12.773/2025):</strong> o <strong>PEI é agora documento oficial e obrigatório</strong> ao lado do PAEE, devendo derivar do Estudo de Caso. Suas observações fundamentam legalmente ambos os documentos.</p></div>
+          <div class="alerta alerta-amarelo"><span class="ico">🔑</span><p><strong>§7º do Art. 11:</strong> "A garantia do AEE não será condicionada à exigência de diagnóstico, laudo ou qualquer outro documento emitido por profissional de saúde." A avaliação pedagógica que você produz tem força legal suficiente para iniciar o atendimento. <strong>Não espere laudo para observar e registrar.</strong></p></div>
+        </div>
+        <div class="nav-bottom"><button class="btn-nav" onclick="irM1(1)">← Anterior</button><span class="prog">2 de 7</span><button class="btn-nav" onclick="irM1(3)">Próximo →</button></div>
+      </section>
+
+      <!-- M1-3 -->
+      <section class="section m1-sec" id="m1s3">
+        <div class="sec-top verde">
+          <div class="breadcrumb">03 · O que observar</div>
+          <h2>As 7 dimensões da avaliação pedagógica</h2>
+          <p class="lead">Uma avaliação eficiente olha para o estudante de forma multidimensional — não apenas pelo desempenho acadêmico.</p>
+        </div>
+        <div class="sec-body">
+          <div class="alerta alerta-verde"><span class="ico">🔭</span><p>O Decreto nº 12.686/2025 define o Estudo de Caso como avaliação de caráter <strong>multidimensional</strong>. Para cada dimensão, registre sempre o que o estudante faz <em>com autonomia</em> e o que faz <em>com apoio</em> — essa distinção é o coração da avaliação pedagógica.</p></div>
+          <div class="dim-grid" style="margin-top:20px;">
+            <div class="dim-card"><div class="dc-h"><div class="dc-n">01</div><div><div class="dc-t">Desempenho acadêmico</div><span class="dc-tag" style="background:var(--verde-claro);color:var(--verde-escuro);">Cognitivo</span></div></div><ul><li>Leitura, escrita, matemática em relação ao ano</li><li>O que domina com autonomia</li><li>Onde apresenta maior dificuldade</li><li>Como processa novas informações</li></ul></div>
+            <div class="dim-card"><div class="dc-h"><div class="dc-n">02</div><div><div class="dc-t">Comunicação e linguagem</div><span class="dc-tag" style="background:var(--azul-claro);color:var(--azul-tag);">Comunicação</span></div></div><ul><li>Como se comunica (verbal, gestual, imagens)</li><li>Compreende instruções coletivas?</li><li>Consegue expressar dúvidas e necessidades?</li><li>Há diferença entre compreensão e expressão?</li></ul></div>
+            <div class="dim-card"><div class="dc-h"><div class="dc-n">03</div><div><div class="dc-t">Interação social e pertencimento</div><span class="dc-tag" style="background:var(--roxo-claro);color:var(--roxo);">Social</span></div></div><ul><li>Relação com os colegas nas atividades</li><li>Participa de grupos? Com que qualidade?</li><li>Sinais de pertença ou de exclusão</li></ul></div>
+            <div class="dim-card"><div class="dc-h"><div class="dc-n">04</div><div><div class="dc-t">Autorregulação e comportamento</div><span class="dc-tag" style="background:var(--laranja-claro);color:var(--laranja);">Emocional</span></div></div><ul><li>Como lida com mudanças e frustração</li><li>Antecedentes dos comportamentos desafiadores</li><li>Estratégias de autorregulação que já usa</li></ul></div>
+            <div class="dim-card"><div class="dc-h"><div class="dc-n">05</div><div><div class="dc-t">Autonomia e funcionalidade</div><span class="dc-tag" style="background:var(--verde-claro);color:var(--verde-escuro);">Funcional</span></div></div><ul><li>Rotinas escolares com independência</li><li>Necessidade de apoio físico/cuidado</li><li>Grau de dependência do adulto nas tarefas</li></ul></div>
+            <div class="dim-card"><div class="dc-h"><div class="dc-n">06</div><div><div class="dc-t">Atenção, engajamento e motivação</div><span class="dc-tag" style="background:var(--amarelo-claro);color:var(--amarelo);">Cognitivo</span></div></div><ul><li>Tempo de atenção sustentada</li><li>Atividades e temas preferidos</li><li>Resposta ao elogio e à correção</li></ul></div>
+            <div class="dim-card"><div class="dc-h"><div class="dc-n">07</div><div><div class="dc-t">Resposta a apoios e acomodações</div><span class="dc-tag" style="background:var(--azul-claro);color:var(--azul-tag);">Pedagógico</span></div></div><ul><li>Acomodações já tentadas e seus resultados</li><li>Canal preferencial de aprendizagem</li><li>O que claramente não funcionou</li></ul></div>
+          </div>
+        </div>
+        <div class="nav-bottom"><button class="btn-nav" onclick="irM1(2)">← Anterior</button><span class="prog">3 de 7</span><button class="btn-nav" onclick="irM1(4)">Próximo →</button></div>
+      </section>
+
+      <!-- M1-4 -->
+      <section class="section m1-sec" id="m1s4">
+        <div class="sec-top verde">
+          <div class="breadcrumb">04 · Roteiro de observação</div>
+          <h2>Roteiro de observação<br>por eixo temático</h2>
+          <p class="lead">Use este roteiro de referência ao longo das semanas de observação. As perguntas aqui são um guia — os dados que você coletar irão para o Formulário de Encaminhamento (Módulo 02).</p>
+        </div>
+        <div class="sec-body">
+          <div class="alerta alerta-verde"><span class="ico">📝</span><p>Observe o estudante em situações variadas: aula expositiva, atividade individual, grupo, intervalo, transições. Anote logo após cada situação relevante, com data e contexto. <strong>Os dados coletados aqui alimentam o Módulo 02.</strong></p></div>
+
+          <div class="rot-bloco"><div class="rot-header" onclick="toggleRot(this)"><span class="rn" style="color:var(--verde-medio);">01</span><span class="rt">Desempenho acadêmico e aprendizagens curriculares</span><span class="rs">▼</span></div><div class="rot-body"><div class="perg-item"><div class="pq">Em qual componente o estudante demonstra maior facilidade? Descreva uma situação concreta.</div><textarea class="campo" placeholder="Ex.: Em Artes, conclui atividades antes dos colegas sem apoio. Em 14/03 produziu mapa mental completo de forma autônoma."></textarea></div><div class="perg-item"><div class="pq">Em qual habilidade específica apresenta maior dificuldade? O que exatamente ele não consegue fazer?</div><textarea class="campo" placeholder="Ex.: Não identifica a ideia principal em textos com mais de 5 linhas. Observado em 15 e 16/03."></textarea></div><div class="perg-item"><div class="pq">Como é sua leitura? Decodifica? Compreende? Lê em voz alta ou silenciosamente?</div><textarea class="campo" placeholder="Descreva o nível e o modo de leitura observados..."></textarea></div><div class="perg-item"><div class="pq">Como é sua escrita? Copia sem erros? Escreve de memória? Produz textos?</div><textarea class="campo" placeholder="Descreva o nível de escrita observado..."></textarea></div><div class="perg-item"><div class="pq">Em Matemática: opera com os quatro processos? Usa material concreto? Precisa de linha numérica?</div><textarea class="campo" placeholder="Descreva o desempenho em matemática..."></textarea></div><div class="perg-item"><div class="pq">Quando o conteúdo é apresentado de forma diferente (vídeo, imagem, manipulável), o desempenho muda? Como?</div><textarea class="campo" placeholder="Descreva como diferentes formatos afetam o desempenho..."></textarea></div></div></div>
+
+          <div class="rot-bloco"><div class="rot-header" onclick="toggleRot(this)"><span class="rn" style="color:var(--azul-tag);">02</span><span class="rt">Comunicação e linguagem</span><span class="rs">▼</span></div><div class="rot-body"><div class="perg-item"><div class="pq">Como o estudante se comunica com você? Com colegas? (fala, gestos, imagens, escrita)</div><textarea class="campo" placeholder="Descreva os modos de comunicação observados..."></textarea></div><div class="perg-item"><div class="pq">Compreende instruções coletivas? É necessário repetir individualmente?</div><textarea class="campo" placeholder="Ex.: Precisa que as instruções sejam repetidas individualmente com apoio visual..."></textarea></div><div class="perg-item"><div class="pq">Consegue expressar dúvidas e pedir ajuda? De que forma?</div><textarea class="campo" placeholder="Descreva como expressa necessidades..."></textarea></div><div class="perg-item"><div class="pq">Há diferença entre o que compreende e o que consegue expressar?</div><textarea class="campo" placeholder="Descreva se há dissociação entre compreensão e expressão..."></textarea></div></div></div>
+
+          <div class="rot-bloco"><div class="rot-header" onclick="toggleRot(this)"><span class="rn" style="color:var(--roxo);">03</span><span class="rt">Interação social, comportamento e autorregulação</span><span class="rs">▼</span></div><div class="rot-body"><div class="perg-item"><div class="pq">O estudante busca interação espontaneamente? Em quais momentos?</div><textarea class="campo" placeholder="Descreva situações de interação espontânea..."></textarea></div><div class="perg-item"><div class="pq">Em atividades em grupo, qual é seu papel? (ativo, passivo, liderança, isolamento)</div><textarea class="campo" placeholder="Descreva o comportamento em atividades coletivas..."></textarea></div><div class="perg-item"><div class="pq">Descreva situações de desregulação emocional: o que aconteceu antes, durante e depois?</div><textarea class="campo" placeholder="Ex.: Em 18/03, quando a atividade foi interrompida..."></textarea></div><div class="perg-item"><div class="pq">O que você já tentou para apoiá-lo nesses momentos? O que funcionou?</div><textarea class="campo" placeholder="Descreva intervenções já realizadas e seus resultados..."></textarea></div></div></div>
+
+          <div class="rot-bloco"><div class="rot-header" onclick="toggleRot(this)"><span class="rn" style="color:var(--amarelo);">04</span><span class="rt">Autonomia, atenção e resposta a apoios</span><span class="rs">▼</span></div><div class="rot-body"><div class="perg-item"><div class="pq">Realiza rotinas escolares de forma independente? Precisa de apoio físico ou de cuidado?</div><textarea class="campo" placeholder="Descreva o grau de autonomia nas rotinas..."></textarea></div><div class="perg-item"><div class="pq">Por quanto tempo mantém atenção focada? Quais atividades geram maior engajamento?</div><textarea class="campo" placeholder="Ex.: Atenção sustentada por ~7 min em tarefas escritas, ~15 min em atividades práticas..."></textarea></div><div class="perg-item"><div class="pq">Quais acomodações você já implementou? Qual foi o resultado?</div><textarea class="campo" placeholder="Ex.: Passei a escrever as instruções no quadro além de falar. Ele passou a iniciar tarefas com mais autonomia."></textarea></div><div class="perg-item"><div class="pq">Ele responde melhor a instruções visuais, verbais ou cinestésicas?</div><textarea class="campo" placeholder="Descreva o canal de aprendizagem preferencial observado..."></textarea></div></div></div>
+        </div>
+        <div class="nav-bottom"><button class="btn-nav" onclick="irM1(3)">← Anterior</button><span class="prog">4 de 7</span><button class="btn-nav" onclick="irM1(5)">Próximo →</button></div>
+      </section>
+
+      <!-- M1-5 -->
+      <section class="section m1-sec" id="m1s5">
+        <div class="sec-top verde">
+          <div class="breadcrumb">05 · Registro qualitativo</div>
+          <h2>A nota anedótica:<br>como registrar com qualidade</h2>
+          <p class="lead">Registro descritivo e contextualizado de uma situação específica observada no cotidiano. Capture o que avaliações formais não conseguem.</p>
+        </div>
+        <div class="sec-body">
+          <div class="tabela-2col">
+            <div class="t2c" style="background:var(--verde-palido);">
+              <h4 style="color:var(--verde-escuro);">✅ Uma boa nota anedótica é...</h4>
+              <ul>
+                <li><span>→</span>Datada e contextualizada (onde, quando, em que situação)</li>
+                <li><span>→</span>Descritiva — relata o que aconteceu, sem julgamento</li>
+                <li><span>→</span>Específica — foca em um episódio concreto</li>
+                <li><span>→</span>Neutra em termos afetivos</li>
+              </ul>
+            </div>
+            <div class="t2c" style="background:var(--laranja-claro);">
+              <h4 style="color:var(--laranja);">❌ Uma nota anedótica NÃO é...</h4>
+              <ul>
+                <li><span>→</span>Um julgamento ("o aluno é preguiçoso")</li>
+                <li><span>→</span>Uma generalização ("ele nunca presta atenção")</li>
+                <li><span>→</span>Uma descrição vaga sem contexto</li>
+                <li><span>→</span>Uma diagnose clínica</li>
+              </ul>
+            </div>
+          </div>
+          <div class="alerta alerta-azul" style="margin-top:16px;">
+            <span class="ico">📖</span>
+            <div>
+              <p><strong>Baixa qualidade:</strong> <em style="color:#888;">"16/03 — O aluno teve um surto e ficou impossível."</em></p>
+              <p style="margin-top:8px;"><strong>Alta qualidade:</strong> <em>"16/03 — Aula de Matemática, 10h20. Quando a atividade em grupo foi interrompida para instrução coletiva, João levantou abruptamente, derrubou o caderno e ficou em pé ~5 min. Ao ser chamado em voz baixa e convidado a retomar com colega de sua escolha, sentou-se e concluiu 2 exercícios."</em></p>
+            </div>
+          </div>
+          <h3 class="tb">Modelo de nota anedótica</h3>
+          <div class="nota-tpl">
+            <div class="nt-head"><span>Nota Anedótica</span><span style="opacity:0.5;font-size:0.63rem;">Preencha logo após o episódio</span></div>
+            <div class="nt-campos">
+              <div class="nt-campo"><label>Data</label><input type="date"></div>
+              <div class="nt-campo"><label>Horário</label><input type="time"></div>
+              <div class="nt-campo"><label>Componente / Situação</label><input type="text" placeholder="Ex.: Matemática / Intervalo"></div>
+              <div class="nt-campo"><label>Tipo de atividade</label><select><option>Selecione...</option><option>Aula expositiva</option><option>Atividade individual</option><option>Atividade em grupo</option><option>Avaliação formal</option><option>Intervalo</option><option>Transição</option><option>Outro</option></select></div>
+              <div class="nt-campo"><label>Dimensão observada</label><select><option>Selecione...</option><option>Desempenho acadêmico</option><option>Comunicação</option><option>Interação social</option><option>Comportamento</option><option>Autonomia</option><option>Atenção</option><option>Resposta a apoios</option></select></div>
+              <div class="nt-campo"><label>Quem estava presente</label><input type="text" placeholder="Ex.: Turma completa, sem apoio"></div>
+            </div>
+            <div class="nt-body">
+              <div class="nt-area"><label>Descrição objetiva (sem julgamentos)</label><textarea placeholder="O que exatamente aconteceu? Seja específico e neutro."></textarea></div>
+              <div class="nt-area"><label>Como respondi</label><textarea placeholder="Sua intervenção, se houve."></textarea></div>
+            </div>
+            <div class="nt-body-full"><div class="nt-area"><label>Resultado e hipótese pedagógica (opcional)</label><textarea style="min-height:50px;" placeholder="Como o estudante respondeu? Que hipótese você levanta?"></textarea></div></div>
+          </div>
+        </div>
+        <div class="nav-bottom"><button class="btn-nav" onclick="irM1(4)">← Anterior</button><span class="prog">5 de 7</span><button class="btn-nav" onclick="irM1(6)">Próximo →</button></div>
+      </section>
+
+      <!-- M1-6 -->
+      <section class="section m1-sec" id="m1s6">
+        <div class="sec-top verde">
+          <div class="breadcrumb">06 · Avaliação de desempenho</div>
+          <h2>Avaliando e documentando<br>o desempenho acadêmico</h2>
+          <p class="lead">Avalie o processo, não só o produto. Como o estudante chega a uma resposta importa tanto quanto a resposta.</p>
+        </div>
+        <div class="sec-body">
+          <h4 class="sub">Escala de níveis de apoio — use ao registrar qualquer habilidade</h4>
+          <div class="escala">
+            <div class="escala-item" style="background:#1B4D3E;color:white;">Independente<br><span style="font-weight:400;font-size:0.62rem;">Sem apoio</span></div>
+            <div class="escala-item" style="background:#2D7A5F;color:white;">Apoio leve<br><span style="font-weight:400;font-size:0.62rem;">Apenas iniciado</span></div>
+            <div class="escala-item" style="background:#5BAA8A;color:white;">Apoio moderado<br><span style="font-weight:400;font-size:0.62rem;">Com pista/modelo</span></div>
+            <div class="escala-item" style="background:#C8E6DA;color:var(--verde-escuro);">Apoio intenso<br><span style="font-weight:400;font-size:0.62rem;">Etapa a etapa</span></div>
+            <div class="escala-item" style="background:#EDF7F2;color:var(--verde-escuro);">Não realiza<br><span style="font-weight:400;font-size:0.62rem;">Mesmo com apoio</span></div>
+          </div>
+          <h3 class="tb" style="margin-top:28px;">O que documentar por área</h3>
+          <div class="dim-grid">
+            <div class="dim-card"><div class="dc-h"><div class="dc-n">📖</div><div><div class="dc-t">Leitura</div></div></div><ul><li>Decodifica? Nível: palavras, frases, textos?</li><li>Compreende? Responde perguntas literais? Inferenciais?</li><li>Lê com fluência ou silabada?</li><li>Precisa de apoio visual junto ao texto?</li></ul></div>
+            <div class="dim-card"><div class="dc-h"><div class="dc-n">✍️</div><div><div class="dc-t">Escrita</div></div></div><ul><li>Hipótese de escrita (pré-silábica, silábica, alfabética)?</li><li>Copia sem erros? Escreve de memória?</li><li>Erros ortográficos mais frequentes?</li><li>Prefere digitar a escrever à mão?</li></ul></div>
+            <div class="dim-card"><div class="dc-h"><div class="dc-n">🔢</div><div><div class="dc-t">Matemática</div></div></div><ul><li>Conta com concreto? Mentalmente? Até que número?</li><li>Opera os quatro processos? Com ou sem material?</li><li>Compreende valor posicional?</li><li>Precisa de linha numérica ou calculadora?</li></ul></div>
+            <div class="dim-card"><div class="dc-h"><div class="dc-n">🌍</div><div><div class="dc-t">Outras áreas</div></div></div><ul><li>Acompanha os conteúdos do seu ano?</li><li>Participa de debates e discussões?</li><li>Em EF e Artes: adaptações necessárias?</li></ul></div>
+          </div>
+          <div class="alerta alerta-roxo" style="margin-top:24px;"><span class="ico">💡</span><p><strong>Dica:</strong> guarde amostras de trabalho do estudante de diferentes momentos. Uma folha com rasuras e tentativas conta mais do que uma nota. Essas amostras enriquecem o Estudo de Caso.</p></div>
+        </div>
+        <div class="nav-bottom"><button class="btn-nav" onclick="irM1(5)">← Anterior</button><span class="prog">6 de 7</span><button class="btn-nav" onclick="irM1(7)">Próximo →</button></div>
+      </section>
+
+      <!-- M1-7 -->
+      <section class="section m1-sec" id="m1s7">
+        <div class="sec-top verde">
+          <div class="breadcrumb">07 · O que evitar</div>
+          <h2>Erros que comprometem<br>a avaliação pedagógica</h2>
+          <p class="lead">Alguns padrões comuns geram dados de baixa qualidade — e podem prejudicar o estudante.</p>
+        </div>
+        <div class="sec-body">
+          <div class="dim-grid">
+            <div class="dim-card" style="border-color:#F4BCBC;"><div class="dc-h"><div class="dc-n" style="color:#F4BCBC;">✗</div><div><div class="dc-t">Confundir dificuldade com incapacidade</div></div></div><ul><li>"Ele não aprende nada" descreve sua percepção, não o estudante</li><li>Substitua por: "Em quais condições ele não consegue realizar?"</li></ul></div>
+            <div class="dim-card" style="border-color:#F4BCBC;"><div class="dc-h"><div class="dc-n" style="color:#F4BCBC;">✗</div><div><div class="dc-t">Avaliar apenas o produto final</div></div></div><ul><li>Uma prova em branco pode não significar que ele não sabe</li><li>Observe: ele tentou? Parou onde? Pediu ajuda?</li></ul></div>
+            <div class="dim-card" style="border-color:#F4BCBC;"><div class="dc-h"><div class="dc-n" style="color:#F4BCBC;">✗</div><div><div class="dc-t">Esperar laudo para observar</div></div></div><ul><li>Muitos estudantes esperarão meses por um diagnóstico</li><li>A lei é explícita: o apoio começa pela avaliação pedagógica</li></ul></div>
+            <div class="dim-card" style="border-color:#F4BCBC;"><div class="dc-h"><div class="dc-n" style="color:#F4BCBC;">✗</div><div><div class="dc-t">Registrar apenas momentos ruins</div></div></div><ul><li>Pontos fortes são a base das metas do PEI</li><li>Focar só nas dificuldades distorce o perfil</li></ul></div>
+            <div class="dim-card" style="border-color:#F4BCBC;"><div class="dc-h"><div class="dc-n" style="color:#F4BCBC;">✗</div><div><div class="dc-t">Comparar com a turma como referência</div></div></div><ul><li>A referência deve ser o próprio estudante ao longo do tempo</li><li>Progresso individual, mesmo pequeno, é progresso</li></ul></div>
+            <div class="dim-card" style="border-color:#F4BCBC;"><div class="dc-h"><div class="dc-n" style="color:#F4BCBC;">✗</div><div><div class="dc-t">Não datar os registros</div></div></div><ul><li>Evolução ao longo do tempo só aparece com datas</li><li>Sempre inclua: data, contexto, situação observada</li></ul></div>
+          </div>
+          <div class="alerta alerta-verde" style="margin-top:28px;"><span class="ico">✅</span><p>Quando estiver pronto para encaminhar seus dados ao AEE, acesse o <strong>Módulo 02 — Formulário de Encaminhamento</strong> pelo botão abaixo ou voltando à tela inicial.</p></div>
+          <button class="btn-start" style="margin-top:16px; background:var(--verde-escuro); color:white;" onclick="voltarInicio()">← Voltar à tela inicial e acessar Módulo 02</button>
+        </div>
+        <div class="nav-bottom"><button class="btn-nav" onclick="irM1(6)">← Anterior</button><span class="prog">7 de 7</span><button class="btn-nav" disabled>Próximo →</button></div>
+      </section>
+    </div><!-- fim modulo1-secoes -->
+
+    <!-- Seções do Módulo 2 -->
+    <div id="modulo2-secoes" style="display:none;">
+
+      <!-- M2-0: Capa -->
+      <section class="section m2-sec" id="m2s0">
+        <div id="m2-capa">
+          <div class="capa-esq-laranja">
+            <div>
+              <div class="capa-tag-laranja">Módulo 02 · Formulário de encaminhamento</div>
+              <h1>Encaminhamento<br><em>ao AEE</em></h1>
+              <p class="sub">Preencha os dados coletados durante o período de observação e gere um PDF formatado para encaminhar à professora do AEE como contribuição ao Estudo de Caso.</p>
+              <button class="btn-start-laranja" onclick="irM2(1)">Preencher →</button>
+            </div>
+            <p style="font-size:0.68rem;color:rgba(255,255,255,0.3);margin-top:32px;">Este formulário fundamenta a elaboração do PAEE e do PEI conforme o Decreto nº 12.686/2025.</p>
+          </div>
+          <div class="capa-dir-laranja">
+            <h3>Seções do formulário</h3>
+            <ol class="indice-laranja">
+              <li onclick="irM2(1)"><span class="n">01</span> Identificação do estudante e do professor</li>
+              <li onclick="irM2(2)"><span class="n">02</span> Perfil de aprendizagem por dimensão</li>
+              <li onclick="irM2(3)"><span class="n">03</span> Desempenho acadêmico por área</li>
+              <li onclick="irM2(4)"><span class="n">04</span> Comportamento e autorregulação</li>
+              <li onclick="irM2(5)"><span class="n">05</span> Acomodações realizadas e resultados</li>
+              <li onclick="irM2(6)"><span class="n">06</span> Síntese e encaminhamento</li>
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      <!-- M2-1: Identificação -->
+      <section class="section m2-sec" id="m2s1">
+        <div class="sec-top laranja"><div class="breadcrumb">01 · Identificação</div><h2>Identificação do estudante<br>e do professor</h2><p class="lead">Preencha os dados que identificam este encaminhamento. Campos marcados com * são obrigatórios.</p></div>
+        <div class="sec-body">
+          <div class="pdf-cabecalho"><h1>Encaminhamento ao AEE — Avaliação Pedagógica do Professor Regente</h1><p>Fundamentado na LBI (Lei nº 13.146/2015) e no Decreto nº 12.686/2025. Documento gerado para subsidiar o Estudo de Caso e a elaboração do PAEE/PEI.</p></div>
+
+          <div class="form-bloco">
+            <h3>Dados da escola e do encaminhamento</h3>
+            <div class="form-grid form-grid-2">
+              <div class="form-grupo"><label>Nome da escola <span class="obrig">*</span></label><input class="form-input" type="text" placeholder="Nome completo da escola"></div>
+              <div class="form-grupo"><label>Município / Estado <span class="obrig">*</span></label><input class="form-input" type="text" placeholder="Ex.: Maceió / AL"></div>
+              <div class="form-grupo"><label>Data de preenchimento <span class="obrig">*</span></label><input class="form-input" type="date"></div>
+              <div class="form-grupo"><label>Período de observação</label><input class="form-input" type="text" placeholder="Ex.: 10/03/2025 a 28/03/2025"></div>
+            </div>
+          </div>
+
+          <div class="form-bloco">
+            <h3>Dados do professor regente</h3>
+            <div class="form-grid form-grid-3">
+              <div class="form-grupo"><label>Nome completo <span class="obrig">*</span></label><input class="form-input" type="text" placeholder="Nome do professor"></div>
+              <div class="form-grupo"><label>Componente(s) curricular(es)</label><input class="form-input" type="text" placeholder="Ex.: Língua Portuguesa, Matemática"></div>
+              <div class="form-grupo"><label>Turma / Ano</label><input class="form-input" type="text" placeholder="Ex.: 6º ano B"></div>
+            </div>
+          </div>
+
+          <div class="form-bloco">
+            <h3>Dados do estudante</h3>
+            <div class="form-grid form-grid-3">
+              <div class="form-grupo"><label>Nome completo <span class="obrig">*</span></label><input class="form-input" type="text" placeholder="Nome do estudante"></div>
+              <div class="form-grupo"><label>Data de nascimento</label><input class="form-input" type="date"></div>
+              <div class="form-grupo"><label>Idade atual</label><input class="form-input" type="text" placeholder="Ex.: 12 anos"></div>
+              <div class="form-grupo"><label>Condição / Deficiência (se houver laudo)</label><input class="form-input" type="text" placeholder="Ex.: TEA / TDAH — ou 'sem diagnóstico formal'"></div>
+              <div class="form-grupo"><label>Tempo na escola atual</label><input class="form-input" type="text" placeholder="Ex.: 2 anos"></div>
+              <div class="form-grupo"><label>Recebe AEE atualmente?</label><select class="form-input"><option value="">Selecione...</option><option>Sim</option><option>Não</option><option>Em processo de avaliação</option></select></div>
+            </div>
+            <div class="form-grid" style="margin-top:12px;">
+              <div class="form-grupo"><label>Observações iniciais relevantes (contexto familiar, histórico escolar, informações da família)</label><textarea class="form-textarea" placeholder="Inclua aqui informações contextuais que possam ser úteis para o Estudo de Caso..."></textarea></div>
+            </div>
+          </div>
+        </div>
+        <div class="nav-bottom"><button class="btn-nav-laranja" disabled>← Anterior</button><span class="prog">1 de 6</span><button class="btn-nav-laranja" onclick="irM2(2)">Próximo →</button></div>
+      </section>
+
+      <!-- M2-2: Perfil de aprendizagem -->
+      <section class="section m2-sec" id="m2s2">
+        <div class="sec-top laranja"><div class="breadcrumb">02 · Perfil de aprendizagem</div><h2>Perfil de aprendizagem<br>por dimensão</h2><p class="lead">Registre suas observações em cada dimensão. Para cada habilidade, indique o nível de apoio necessário e descreva o que observou.</p></div>
+        <div class="sec-body">
+          <div class="alerta alerta-laranja"><span class="ico">📌</span><p>Para cada dimensão, tente registrar tanto o que o estudante faz <strong>com autonomia</strong> quanto o que faz <strong>com apoio</strong>. Essa distinção é o dado mais valioso para o Estudo de Caso.</p></div>
+
+          <div class="dim-form-bloco"><div class="dim-form-header" onclick="toggleDimForm(this)"><span class="dfn">01</span><span class="dft">Comunicação e linguagem</span><span class="dfs">▼</span></div><div class="dim-form-body">
+            <div style="margin-top:14px;">
+              <div class="form-grupo" style="margin-bottom:10px;"><label>Como o estudante se comunica (verbal, gestual, por imagens, escrita, outro)</label><textarea class="form-textarea" placeholder="Descreva os modos de comunicação observados em sala..."></textarea></div>
+              <div class="form-grupo" style="margin-bottom:10px;"><label>Compreensão de instruções coletivas</label>
+                <div class="nivel-grid" id="ng-com1">
+                  <div class="nivel-item ni-1" onclick="selecionarNivel(this,'ng-com1')">Compreende sempre</div>
+                  <div class="nivel-item ni-2" onclick="selecionarNivel(this,'ng-com1')">Compreende na maioria</div>
+                  <div class="nivel-item ni-3" onclick="selecionarNivel(this,'ng-com1')">Precisa de repetição individual</div>
+                  <div class="nivel-item ni-4" onclick="selecionarNivel(this,'ng-com1')">Precisa de apoio visual também</div>
+                  <div class="nivel-item ni-5" onclick="selecionarNivel(this,'ng-com1')">Raramente compreende</div>
+                </div>
+              </div>
+              <div class="form-grupo"><label>Observações complementares sobre comunicação</label><textarea class="form-textarea" placeholder="Ex.: Há diferença entre o que compreende e o que consegue expressar? Usa comunicação alternativa?"></textarea></div>
+            </div>
+          </div></div>
+
+          <div class="dim-form-bloco"><div class="dim-form-header" onclick="toggleDimForm(this)"><span class="dfn">02</span><span class="dft">Interação social e pertencimento à turma</span><span class="dfs">▼</span></div><div class="dim-form-body">
+            <div style="margin-top:14px;">
+              <div class="form-grupo" style="margin-bottom:10px;"><label>Como se relaciona com os colegas — descreva situações concretas</label><textarea class="form-textarea" placeholder="Busca interação? Em quais momentos? Qual é seu papel nos grupos?"></textarea></div>
+              <div class="form-grupo" style="margin-bottom:10px;"><label>Participação em atividades em grupo</label>
+                <div class="nivel-grid" id="ng-soc1">
+                  <div class="nivel-item ni-1" onclick="selecionarNivel(this,'ng-soc1')">Participa ativamente</div>
+                  <div class="nivel-item ni-2" onclick="selecionarNivel(this,'ng-soc1')">Participa com apoio</div>
+                  <div class="nivel-item ni-3" onclick="selecionarNivel(this,'ng-soc1')">Participa parcialmente</div>
+                  <div class="nivel-item ni-4" onclick="selecionarNivel(this,'ng-soc1')">Participa pouco</div>
+                  <div class="nivel-item ni-5" onclick="selecionarNivel(this,'ng-soc1')">Não participa</div>
+                </div>
+              </div>
+              <div class="form-grupo"><label>Sinais de pertencimento ou exclusão observados</label><textarea class="form-textarea" placeholder="O estudante se refere à turma como 'minha turma'? Há bullying ou exclusão?"></textarea></div>
+            </div>
+          </div></div>
+
+          <div class="dim-form-bloco"><div class="dim-form-header" onclick="toggleDimForm(this)"><span class="dfn">03</span><span class="dft">Autonomia e funcionalidade nas rotinas escolares</span><span class="dfs">▼</span></div><div class="dim-form-body">
+            <div style="margin-top:14px;">
+              <div class="form-grupo" style="margin-bottom:10px;"><label>Realiza as rotinas escolares de forma independente?</label>
+                <div class="nivel-grid" id="ng-aut1">
+                  <div class="nivel-item ni-1" onclick="selecionarNivel(this,'ng-aut1')">Independente</div>
+                  <div class="nivel-item ni-2" onclick="selecionarNivel(this,'ng-aut1')">Apoio leve</div>
+                  <div class="nivel-item ni-3" onclick="selecionarNivel(this,'ng-aut1')">Apoio moderado</div>
+                  <div class="nivel-item ni-4" onclick="selecionarNivel(this,'ng-aut1')">Apoio intenso</div>
+                  <div class="nivel-item ni-5" onclick="selecionarNivel(this,'ng-aut1')">Dependente</div>
+                </div>
+              </div>
+              <div class="form-grupo"><label>Descreva necessidades específicas de apoio físico, de cuidado ou de comunicação</label><textarea class="form-textarea" placeholder="Locomoção, alimentação, higiene, comunicação — o que requer apoio e de que tipo?"></textarea></div>
+            </div>
+          </div></div>
+
+          <div class="dim-form-bloco"><div class="dim-form-header" onclick="toggleDimForm(this)"><span class="dfn">04</span><span class="dft">Atenção, engajamento e motivação</span><span class="dfs">▼</span></div><div class="dim-form-body">
+            <div style="margin-top:14px;">
+              <div class="form-grupo" style="margin-bottom:10px;"><label>Tempo aproximado de atenção sustentada em tarefa escrita</label><input class="form-input" type="text" placeholder="Ex.: ~7 minutos em tarefas escritas, ~15 minutos em atividades práticas"></div>
+              <div class="form-grupo" style="margin-bottom:10px;"><label>Atividades, temas ou formatos que geram maior engajamento</label><textarea class="form-textarea" placeholder="Descreva interesses e atividades preferidas observadas em sala..."></textarea></div>
+              <div class="form-grupo"><label>Como responde ao elogio? E à correção?</label><textarea class="form-textarea" placeholder="Fica motivado, indiferente, frustrado? Descreva situações observadas."></textarea></div>
+            </div>
+          </div></div>
+        </div>
+        <div class="nav-bottom"><button class="btn-nav-laranja" onclick="irM2(1)">← Anterior</button><span class="prog">2 de 6</span><button class="btn-nav-laranja" onclick="irM2(3)">Próximo →</button></div>
+      </section>
+
+      <!-- M2-3: Desempenho acadêmico -->
+      <section class="section m2-sec" id="m2s3">
+        <div class="sec-top laranja"><div class="breadcrumb">03 · Desempenho acadêmico</div><h2>Desempenho acadêmico<br>por área</h2><p class="lead">Registre o nível atual de desempenho usando a escala de apoio. Seja específico — indique com exemplos quando possível.</p></div>
+        <div class="sec-body">
+          <div class="alerta alerta-amarelo" style="margin-bottom:20px;"><span class="ico">📊</span><p>Para cada habilidade, selecione o nível de apoio necessário na escala abaixo dela. <strong>1 = independente · 5 = não realiza mesmo com apoio.</strong></p></div>
+
+          <div class="form-bloco">
+            <h3>Leitura</h3>
+            <div class="form-grid">
+              <div class="form-grupo"><label>Nível geral de leitura</label>
+                <div class="nivel-grid" id="ng-lei1">
+                  <div class="nivel-item ni-1" onclick="selecionarNivel(this,'ng-lei1')">Lê textos com fluência</div>
+                  <div class="nivel-item ni-2" onclick="selecionarNivel(this,'ng-lei1')">Lê frases com fluência</div>
+                  <div class="nivel-item ni-3" onclick="selecionarNivel(this,'ng-lei1')">Lê palavras silabadas</div>
+                  <div class="nivel-item ni-4" onclick="selecionarNivel(this,'ng-lei1')">Reconhece letras/palavras</div>
+                  <div class="nivel-item ni-5" onclick="selecionarNivel(this,'ng-lei1')">Pré-leitor</div>
+                </div>
+              </div>
+              <div class="form-grupo"><label>Compreensão leitora</label>
+                <div class="nivel-grid" id="ng-lei2">
+                  <div class="nivel-item ni-1" onclick="selecionarNivel(this,'ng-lei2')">Compreende e infere</div>
+                  <div class="nivel-item ni-2" onclick="selecionarNivel(this,'ng-lei2')">Compreende literalmente</div>
+                  <div class="nivel-item ni-3" onclick="selecionarNivel(this,'ng-lei2')">Compreende com apoio</div>
+                  <div class="nivel-item ni-4" onclick="selecionarNivel(this,'ng-lei2')">Compreensão limitada</div>
+                  <div class="nivel-item ni-5" onclick="selecionarNivel(this,'ng-lei2')">Não demonstra compreensão</div>
+                </div>
+              </div>
+              <div class="form-grupo"><label>Observações sobre leitura</label><textarea class="form-textarea" placeholder="Descreva o que observou: tipo de texto que consegue ler, dificuldades específicas, se prefere texto em áudio..."></textarea></div>
+            </div>
+          </div>
+
+          <div class="form-bloco">
+            <h3>Escrita</h3>
+            <div class="form-grid">
+              <div class="form-grupo"><label>Hipótese / nível de escrita</label>
+                <div class="nivel-grid" id="ng-esc1">
+                  <div class="nivel-item ni-1" onclick="selecionarNivel(this,'ng-esc1')">Escrita alfabética convencional</div>
+                  <div class="nivel-item ni-2" onclick="selecionarNivel(this,'ng-esc1')">Alfabética com erros</div>
+                  <div class="nivel-item ni-3" onclick="selecionarNivel(this,'ng-esc1')">Silábico-alfabética</div>
+                  <div class="nivel-item ni-4" onclick="selecionarNivel(this,'ng-esc1')">Silábica</div>
+                  <div class="nivel-item ni-5" onclick="selecionarNivel(this,'ng-esc1')">Pré-silábica</div>
+                </div>
+              </div>
+              <div class="form-grupo"><label>Produção textual</label>
+                <div class="nivel-grid" id="ng-esc2">
+                  <div class="nivel-item ni-1" onclick="selecionarNivel(this,'ng-esc2')">Produz textos com coesão</div>
+                  <div class="nivel-item ni-2" onclick="selecionarNivel(this,'ng-esc2')">Produz frases/parágrafos</div>
+                  <div class="nivel-item ni-3" onclick="selecionarNivel(this,'ng-esc2')">Produz com apoio/modelo</div>
+                  <div class="nivel-item ni-4" onclick="selecionarNivel(this,'ng-esc2')">Copia sem produzir</div>
+                  <div class="nivel-item ni-5" onclick="selecionarNivel(this,'ng-esc2')">Não produz texto</div>
+                </div>
+              </div>
+              <div class="form-grupo"><label>Observações sobre escrita</label><textarea class="form-textarea" placeholder="Tipos de erro mais frequentes, se prefere digitar, dificuldades motoras, etc."></textarea></div>
+            </div>
+          </div>
+
+          <div class="form-bloco">
+            <h3>Matemática</h3>
+            <div class="form-grid">
+              <div class="form-grupo"><label>Operações matemáticas</label>
+                <div class="nivel-grid" id="ng-mat1">
+                  <div class="nivel-item ni-1" onclick="selecionarNivel(this,'ng-mat1')">Realiza as 4 operações</div>
+                  <div class="nivel-item ni-2" onclick="selecionarNivel(this,'ng-mat1')">Ad. e sub. com autonomia</div>
+                  <div class="nivel-item ni-3" onclick="selecionarNivel(this,'ng-mat1')">Opera com material concreto</div>
+                  <div class="nivel-item ni-4" onclick="selecionarNivel(this,'ng-mat1')">Conta com apoio</div>
+                  <div class="nivel-item ni-5" onclick="selecionarNivel(this,'ng-mat1')">Não opera</div>
+                </div>
+              </div>
+              <div class="form-grupo"><label>Resolução de problemas</label>
+                <div class="nivel-grid" id="ng-mat2">
+                  <div class="nivel-item ni-1" onclick="selecionarNivel(this,'ng-mat2')">Com autonomia</div>
+                  <div class="nivel-item ni-2" onclick="selecionarNivel(this,'ng-mat2')">Com pistas verbais</div>
+                  <div class="nivel-item ni-3" onclick="selecionarNivel(this,'ng-mat2')">Com apoio intenso</div>
+                  <div class="nivel-item ni-4" onclick="selecionarNivel(this,'ng-mat2')">Com adaptação do enunciado</div>
+                  <div class="nivel-item ni-5" onclick="selecionarNivel(this,'ng-mat2')">Não resolve</div>
+                </div>
+              </div>
+              <div class="form-grupo"><label>Observações sobre matemática</label><textarea class="form-textarea" placeholder="Usa linha numérica? Calculadora? Compreende valor posicional? Precisa de material concreto?"></textarea></div>
+            </div>
+          </div>
+
+          <div class="form-bloco">
+            <h3>Outras áreas e participação geral</h3>
+            <div class="form-grid">
+              <div class="form-grupo"><label>Participação nas demais disciplinas</label><textarea class="form-textarea" placeholder="Como acompanha Ciências, História, Geografia, EF, Artes? Que adaptações foram necessárias?"></textarea></div>
+              <div class="form-grupo"><label>Pontos fortes e interesses do estudante</label><textarea class="form-textarea" placeholder="Descreva as áreas onde demonstra mais competência, engajamento e interesse — esses são o ponto de partida das metas do PEI."></textarea></div>
+            </div>
+          </div>
+        </div>
+        <div class="nav-bottom"><button class="btn-nav-laranja" onclick="irM2(2)">← Anterior</button><span class="prog">3 de 6</span><button class="btn-nav-laranja" onclick="irM2(4)">Próximo →</button></div>
+      </section>
+
+      <!-- M2-4: Comportamento -->
+      <section class="section m2-sec" id="m2s4">
+        <div class="sec-top laranja"><div class="breadcrumb">04 · Comportamento</div><h2>Comportamento<br>e autorregulação</h2><p class="lead">Registre as situações observadas e as intervenções já realizadas. Lembre-se: o comportamento é comunicação.</p></div>
+        <div class="sec-body">
+          <div class="form-bloco">
+            <h3>Autorregulação e comportamentos desafiadores</h3>
+            <div class="form-grid">
+              <div class="form-grupo"><label>Frequência de comportamentos que interferem na aprendizagem</label>
+                <div class="nivel-grid" id="ng-comp1" style="grid-template-columns: repeat(5,1fr);">
+                  <div class="nivel-item ni-1" onclick="selecionarNivel(this,'ng-comp1')">Nunca ou raramente</div>
+                  <div class="nivel-item ni-2" onclick="selecionarNivel(this,'ng-comp1')">Ocasionalmente</div>
+                  <div class="nivel-item ni-3" onclick="selecionarNivel(this,'ng-comp1')">Semanalmente</div>
+                  <div class="nivel-item ni-4" onclick="selecionarNivel(this,'ng-comp1')">Várias vezes/semana</div>
+                  <div class="nivel-item ni-5" onclick="selecionarNivel(this,'ng-comp1')">Diariamente</div>
+                </div>
+              </div>
+              <div class="form-grupo"><label>Descrição dos comportamentos observados (com data, contexto, antecedente e consequente)</label><textarea class="form-textarea" style="min-height:90px;" placeholder="Ex.: 18/03 — Aula de Português. Quando foi informado da mudança de atividade (antecedente), levantou e derrubou o material (comportamento). Ao ser redirecionado com voz calma para uma tarefa de sua escolha, retomou em ~5 min (consequente)."></textarea></div>
+              <div class="form-grupo"><label>Contextos ou situações que parecem desencadear os comportamentos</label><textarea class="form-textarea" placeholder="Transições, barulho, avaliações, mudança de professor, frustração acadêmica..."></textarea></div>
+              <div class="form-grupo"><label>Estratégias de autorregulação que o estudante já usa</label><textarea class="form-textarea" placeholder="Se afasta, pede para sair, usa objeto sensorial, busca o adulto, outro..."></textarea></div>
+            </div>
+          </div>
+          <div class="form-bloco">
+            <h3>Existe Plano de Intervenção Comportamental (BIP)?</h3>
+            <div class="form-grid form-grid-2">
+              <div class="form-grupo"><label>O estudante possui BIP?</label><select class="form-input"><option value="">Selecione...</option><option>Sim — está sendo implementado</option><option>Sim — mas não está sendo seguido integralmente</option><option>Não possui BIP</option><option>Em processo de elaboração</option></select></div>
+              <div class="form-grupo"><label>O que tem funcionado para prevenir comportamentos desafiadores</label><textarea class="form-textarea" placeholder="Rotina visual, aviso antecipado de mudanças, escolhas, etc."></textarea></div>
+            </div>
+          </div>
+        </div>
+        <div class="nav-bottom"><button class="btn-nav-laranja" onclick="irM2(3)">← Anterior</button><span class="prog">4 de 6</span><button class="btn-nav-laranja" onclick="irM2(5)">Próximo →</button></div>
+      </section>
+
+      <!-- M2-5: Acomodações -->
+      <section class="section m2-sec" id="m2s5">
+        <div class="sec-top laranja"><div class="breadcrumb">05 · Acomodações realizadas</div><h2>Acomodações realizadas<br>e resultados observados</h2><p class="lead">Registre o que já foi tentado em sala — tanto o que funcionou quanto o que não funcionou. Esses dados são essenciais para o PEI.</p></div>
+        <div class="sec-body">
+          <div class="form-bloco">
+            <h3>Acomodações e modificações já implementadas</h3>
+            <div class="form-grid">
+              <div class="form-grupo"><label>Marque as acomodações já utilizadas com este estudante</label>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top:8px;" id="acom-checks">
+                  <label style="display:flex;align-items:center;gap:8px;font-size:0.82rem;cursor:pointer;padding:5px 0;border-bottom:1px solid var(--creme-escuro);"><input type="checkbox"> Tempo adicional em avaliações</label>
+                  <label style="display:flex;align-items:center;gap:8px;font-size:0.82rem;cursor:pointer;padding:5px 0;border-bottom:1px solid var(--creme-escuro);"><input type="checkbox"> Instruções repetidas individualmente</label>
+                  <label style="display:flex;align-items:center;gap:8px;font-size:0.82rem;cursor:pointer;padding:5px 0;border-bottom:1px solid var(--creme-escuro);"><input type="checkbox"> Apoio visual (imagens, esquemas)</label>
+                  <label style="display:flex;align-items:center;gap:8px;font-size:0.82rem;cursor:pointer;padding:5px 0;border-bottom:1px solid var(--creme-escuro);"><input type="checkbox"> Cronograma visual da aula</label>
+                  <label style="display:flex;align-items:center;gap:8px;font-size:0.82rem;cursor:pointer;padding:5px 0;border-bottom:1px solid var(--creme-escuro);"><input type="checkbox"> Respostas orais em vez de escritas</label>
+                  <label style="display:flex;align-items:center;gap:8px;font-size:0.82rem;cursor:pointer;padding:5px 0;border-bottom:1px solid var(--creme-escuro);"><input type="checkbox"> Redução do número de questões</label>
+                  <label style="display:flex;align-items:center;gap:8px;font-size:0.82rem;cursor:pointer;padding:5px 0;border-bottom:1px solid var(--creme-escuro);"><input type="checkbox"> Material de referência na mesa</label>
+                  <label style="display:flex;align-items:center;gap:8px;font-size:0.82rem;cursor:pointer;padding:5px 0;border-bottom:1px solid var(--creme-escuro);"><input type="checkbox"> Apoio de colega / parceiro</label>
+                  <label style="display:flex;align-items:center;gap:8px;font-size:0.82rem;cursor:pointer;padding:5px 0;border-bottom:1px solid var(--creme-escuro);"><input type="checkbox"> Pausas programadas</label>
+                  <label style="display:flex;align-items:center;gap:8px;font-size:0.82rem;cursor:pointer;padding:5px 0;border-bottom:1px solid var(--creme-escuro);"><input type="checkbox"> Tecnologia assistiva</label>
+                  <label style="display:flex;align-items:center;gap:8px;font-size:0.82rem;cursor:pointer;padding:5px 0;border-bottom:1px solid var(--creme-escuro);"><input type="checkbox"> Assento preferencial</label>
+                  <label style="display:flex;align-items:center;gap:8px;font-size:0.82rem;cursor:pointer;padding:5px 0;border-bottom:1px solid var(--creme-escuro);"><input type="checkbox"> Prova com formato alternativo</label>
+                </div>
+              </div>
+              <div class="form-grupo" style="margin-top:10px;"><label>Descreva os resultados das acomodações marcadas acima</label><textarea class="form-textarea" style="min-height:80px;" placeholder="Ex.: O cronograma visual reduziu significativamente a agitação nas transições. A redução de questões não pareceu melhorar o engajamento."></textarea></div>
+              <div class="form-grupo"><label>O que definitivamente NÃO funcionou — e por que, na sua hipótese</label><textarea class="form-textarea" placeholder="Descreva estratégias tentadas sem resultado e sua hipótese sobre o motivo..."></textarea></div>
+              <div class="form-grupo"><label>Canal de aprendizagem preferencial observado</label>
+                <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;">
+                  <label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;cursor:pointer;"><input type="radio" name="canal"> Visual (imagens, esquemas, vídeos)</label>
+                  <label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;cursor:pointer;"><input type="radio" name="canal"> Verbal (explicação oral)</label>
+                  <label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;cursor:pointer;"><input type="radio" name="canal"> Cinestésico (manipulação, movimento)</label>
+                  <label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;cursor:pointer;"><input type="radio" name="canal"> Misto</label>
+                  <label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;cursor:pointer;"><input type="radio" name="canal"> Não foi possível identificar ainda</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="nav-bottom"><button class="btn-nav-laranja" onclick="irM2(4)">← Anterior</button><span class="prog">5 de 6</span><button class="btn-nav-laranja" onclick="irM2(6)">Próximo →</button></div>
+      </section>
+
+      <!-- M2-6: Síntese e encaminhamento -->
+      <section class="section m2-sec" id="m2s6">
+        <div class="sec-top laranja"><div class="breadcrumb">06 · Síntese e encaminhamento</div><h2>Síntese das observações<br>e encaminhamento ao AEE</h2><p class="lead">Esta é a seção que será lida primeiro pela professora do AEE. Seja claro, objetivo e baseado no que você efetivamente observou.</p></div>
+        <div class="sec-body">
+          <div class="form-bloco">
+            <h3>Síntese do perfil do estudante</h3>
+            <div class="form-grid">
+              <div class="form-grupo"><label>Principais pontos fortes e potencialidades observados em sala</label><textarea class="form-textarea" style="min-height:80px;" placeholder="Descreva com base em situações concretas o que o estudante faz bem — com e sem apoio."></textarea></div>
+              <div class="form-grupo"><label>Principais barreiras observadas para a aprendizagem e participação</label><textarea class="form-textarea" style="min-height:80px;" placeholder="Barreiras curriculares, comunicacionais, físicas, ambientais, atitudinais — cite situações específicas."></textarea></div>
+              <div class="form-grupo"><label>O que mais lhe chama atenção neste estudante e que ainda não consegue compreender ou manejar bem</label><textarea class="form-textarea" placeholder="Espaço para questões abertas que você quer trazer para a discussão do Estudo de Caso."></textarea></div>
+            </div>
+          </div>
+
+          <div class="form-bloco">
+            <h3>Hipóteses e necessidades identificadas</h3>
+            <div class="form-grid">
+              <div class="form-grupo"><label>Na sua percepção, quais recursos ou apoios este estudante mais necessita na sala de aula regular</label><textarea class="form-textarea" placeholder="Ex.: Profissional de apoio para comunicação, materiais em formato visual, tempo adicional em provas, adaptação curricular em Língua Portuguesa..."></textarea></div>
+              <div class="form-grupo"><label>Há necessidade identificada de profissional de apoio escolar?</label><select class="form-input"><option value="">Selecione...</option><option>Sim — para locomoção</option><option>Sim — para comunicação</option><option>Sim — para alimentação/higiene</option><option>Sim — para participação geral nas atividades</option><option>Não identificada neste momento</option><option>Não sei avaliar — preciso de orientação</option></select></div>
+              <div class="form-grupo"><label>Metas que você sugere para o PEI (o que você acredita que é o próximo passo pedagógico razoável para este estudante)</label><textarea class="form-textarea" placeholder="Ex.: Identificar a ideia principal em textos curtos com apoio de organizador gráfico; operar adição e subtração com material concreto..."></textarea></div>
+            </div>
+          </div>
+
+          <div class="form-bloco">
+            <h3>Assinatura e data</h3>
+            <div class="form-grid form-grid-3">
+              <div class="form-grupo"><label>Nome do professor regente</label><input class="form-input" type="text" placeholder="Nome completo"></div>
+              <div class="form-grupo"><label>Data de conclusão do preenchimento</label><input class="form-input" type="date"></div>
+              <div class="form-grupo"><label>Assinatura (imprimir e assinar no PDF)</label><input class="form-input" type="text" placeholder="___________________________" readonly style="color:#BBB;"></div>
+            </div>
+          </div>
+
+          <div class="alerta alerta-verde" style="margin-top:8px;"><span class="ico">✅</span><p>Formulário pronto? Clique em <strong>"Gerar PDF"</strong> na barra abaixo para gerar o documento formatado e encaminhar à professora do AEE.</p></div>
+        </div>
+        <div class="nav-bottom"><button class="btn-nav-laranja" onclick="irM2(5)">← Anterior</button><span class="prog">6 de 6</span><button class="btn-nav-laranja" disabled>Concluído ✓</button></div>
+        <div class="barra-pdf">
+          <div><div class="bp-texto">📄 Formulário de encaminhamento completo</div><div class="bp-sub">Revise todas as seções antes de gerar o PDF</div></div>
+          <button class="btn-pdf" onclick="gerarPDF()">⬇ Gerar PDF para o AEE</button>
+        </div>
+      </section>
+
+    </div><!-- fim modulo2-secoes -->
+  </main>
+</div><!-- fim app-modulo -->
+
+<script>
+/* ============================================================
+   ESTADO
+============================================================ */
+let moduloAtivo = 0;
+let secaoM1 = 0;
+let secaoM2 = 0;
+
+const navsM1 = [
+  {num:'—', label:'Início'},
+  {num:'01', label:'O que é e por que importa'},
+  {num:'02', label:'O que a lei determina'},
+  {num:'03', label:'As dimensões da avaliação'},
+  {num:'04', label:'Roteiro de observação'},
+  {num:'05', label:'A nota anedótica'},
+  {num:'06', label:'Avaliação de desempenho'},
+  {num:'07', label:'Erros a evitar'},
+];
+
+const navsM2 = [
+  {num:'—', label:'Início'},
+  {num:'01', label:'Identificação'},
+  {num:'02', label:'Perfil de aprendizagem'},
+  {num:'03', label:'Desempenho acadêmico'},
+  {num:'04', label:'Comportamento'},
+  {num:'05', label:'Acomodações realizadas'},
+  {num:'06', label:'Síntese e encaminhamento'},
+];
+
+/* ============================================================
+   MÓDULOS
+============================================================ */
+function abrirModulo(n) {
+  moduloAtivo = n;
+  document.getElementById('tela-modulos').style.display = 'none';
+  document.getElementById('app-modulo').style.display = 'block';
+  document.getElementById('menu-btn').style.background = n === 1 ? 'var(--verde-escuro)' : '#2A1A0E';
+
+  const sb = document.getElementById('sidebar');
+  sb.className = n === 1 ? 'sb-m1' : 'sb-m2';
+
+  document.getElementById('sb-titulo').textContent = n === 1 ? 'Guia de Orientações' : 'Formulário de Encaminhamento';
+  document.getElementById('sb-modulo-label').textContent = 'Módulo 0' + n;
+
+  document.getElementById('modulo1-secoes').style.display = n === 1 ? 'block' : 'none';
+  document.getElementById('modulo2-secoes').style.display = n === 2 ? 'block' : 'none';
+
+  construirNav(n);
+
+  if (n === 1) irM1(0);
+  else irM2(0);
+}
+
+function voltarInicio() {
+  document.getElementById('app-modulo').style.display = 'none';
+  document.getElementById('tela-modulos').style.display = 'flex';
+  moduloAtivo = 0;
+}
+
+/* ============================================================
+   NAVEGAÇÃO
+============================================================ */
+function construirNav(modulo) {
+  const nav = document.getElementById('nav-links');
+  nav.innerHTML = '';
+  const items = modulo === 1 ? navsM1 : navsM2;
+  items.forEach((item, idx) => {
+    const btn = document.createElement('button');
+    btn.innerHTML = `<span class="num">${item.num}</span>${item.label}`;
+    btn.setAttribute('data-i', idx);
+    btn.onclick = () => { modulo === 1 ? irM1(idx) : irM2(idx); };
+    nav.appendChild(btn);
+  });
+}
+
+function irM1(idx) {
+  secaoM1 = idx;
+  document.querySelectorAll('.m1-sec').forEach(s => s.classList.remove('ativo'));
+  const el = document.getElementById('m1s' + idx);
+  if (el) { el.classList.add('ativo'); }
+  atualizarNav(idx);
+  window.scrollTo(0,0);
+  if (window.innerWidth <= 800) document.getElementById('sidebar').classList.remove('open');
+}
+
+function irM2(idx) {
+  secaoM2 = idx;
+  document.querySelectorAll('.m2-sec').forEach(s => s.classList.remove('ativo'));
+  const el = document.getElementById('m2s' + idx);
+  if (el) { el.classList.add('ativo'); }
+  atualizarNav(idx);
+  window.scrollTo(0,0);
+  if (window.innerWidth <= 800) document.getElementById('sidebar').classList.remove('open');
+}
+
+function atualizarNav(idx) {
+  document.querySelectorAll('#nav-links button').forEach((btn, i) => {
+    btn.classList.toggle('ativo', i === idx);
+  });
+}
+
+function toggleMenu() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+document.addEventListener('click', (e) => {
+  if (window.innerWidth <= 800 && !e.target.closest('#sidebar') && !e.target.closest('#menu-btn')) {
+    document.getElementById('sidebar').classList.remove('open');
+  }
+});
+
+/* ============================================================
+   INTERATIVIDADE
+============================================================ */
+function ck(li) {
+  const box = li.querySelector('.ck-box');
+  box.classList.toggle('on');
+  li.style.opacity = box.classList.contains('on') ? '0.5' : '';
+  li.style.textDecoration = box.classList.contains('on') ? 'line-through' : '';
+}
+
+function toggleRot(header) {
+  header.classList.toggle('aberto');
+  header.nextElementSibling.classList.toggle('aberto');
+}
+
+function toggleDimForm(header) {
+  header.classList.toggle('aberto');
+  header.nextElementSibling.classList.toggle('aberto');
+}
+
+function selecionarNivel(el, grupoId) {
+  document.querySelectorAll('#' + grupoId + ' .nivel-item').forEach(n => n.classList.remove('selecionado'));
+  el.classList.add('selecionado');
+}
+
+/* ============================================================
+   GERAR PDF  ← BUG CORRIGIDO AQUI
+   Problema original: window.open('', '_blank') + document.write()
+   é bloqueado por pop-up blockers e o evento onload não dispara
+   de forma confiável após document.write().
+   Solução: gerar um Blob URL e navegar para ele — o navegador
+   trata como navegação normal, sem bloqueio de pop-up.
+============================================================ */
+function gerarPDF() {
+
+  // ── 1. Funções auxiliares de coleta ────────────────────────
+  function nomeNivel(gridId) {
+    const sel = document.querySelector('#' + gridId + ' .nivel-item.selecionado');
+    return sel ? sel.textContent.trim() : '(não selecionado)';
+  }
+
+  function checkboxesMarcados(containerId) {
+    const labels = document.querySelectorAll('#' + containerId + ' label');
+    const marcados = [];
+    labels.forEach(lb => {
+      const cb = lb.querySelector('input[type="checkbox"]');
+      if (cb && cb.checked) marcados.push(lb.textContent.trim());
+    });
+    return marcados;
+  }
+
+  function radioMarcado(name) {
+    const el = document.querySelector('input[name="' + name + '"]:checked');
+    return el ? el.parentElement.textContent.trim() : '(não selecionado)';
+  }
+
+  // Coleta inputs de cada seção por índice
+  const s1_inputs = Array.from(document.querySelectorAll('#m2s1 input:not([type=checkbox]):not([type=radio]), #m2s1 select'));
+  const s1_tas    = Array.from(document.querySelectorAll('#m2s1 textarea'));
+  const s2_inputs = Array.from(document.querySelectorAll('#m2s2 input:not([type=checkbox]):not([type=radio]), #m2s2 select'));
+  const s2_tas    = Array.from(document.querySelectorAll('#m2s2 textarea'));
+  const s3_tas    = Array.from(document.querySelectorAll('#m2s3 textarea'));
+  const s4_inputs = Array.from(document.querySelectorAll('#m2s4 input:not([type=checkbox]):not([type=radio]), #m2s4 select'));
+  const s4_tas    = Array.from(document.querySelectorAll('#m2s4 textarea'));
+  const s5_tas    = Array.from(document.querySelectorAll('#m2s5 textarea'));
+  const s6_inputs = Array.from(document.querySelectorAll('#m2s6 input:not([type=checkbox]):not([type=radio]), #m2s6 select'));
+  const s6_tas    = Array.from(document.querySelectorAll('#m2s6 textarea'));
+
+  function gi(arr, n) { return arr[n] ? arr[n].value : ''; }
+
+  const acomMarcados = checkboxesMarcados('acom-checks');
+  const canalMarcado = radioMarcado('canal');
+
+  // ── 2. Funções de montagem HTML ────────────────────────────
+  function esc(str) {
+    return String(str)
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;');
+  }
+
+  function campo(rotulo, valor, linhas) {
+    linhas = linhas || 1;
+    const h = linhas === 1 ? '28px' : (linhas * 22) + 'px';
+    const conteudo = valor
+      ? `<div style="padding:6px 10px;font-size:11px;color:#222;line-height:1.5;">${esc(valor).replace(/\n/g,'<br>')}</div>`
+      : `<div style="height:${h};"></div>`;
+    return `<div style="margin-bottom:12px;">
+      <div style="font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#C04A00;margin-bottom:3px;">${esc(rotulo)}</div>
+      <div style="border:1px solid #CCC;border-radius:5px;min-height:${h};background:#fff;">${conteudo}</div>
+    </div>`;
+  }
+
+  function nivelBox(rotulo, gridId) {
+    return campo(rotulo, nomeNivel(gridId), 1);
+  }
+
+  function secao(titulo, conteudo, cor) {
+    cor = cor || '#C04A00';
+    return `<div style="margin-bottom:20px;page-break-inside:avoid;">
+      <div style="background:${cor};color:white;padding:8px 14px;border-radius:7px 7px 0 0;font-size:11px;font-weight:700;">${titulo}</div>
+      <div style="border:1px solid #DDD;border-top:none;border-radius:0 0 7px 7px;padding:14px 16px;background:#fff;">${conteudo}</div>
+    </div>`;
+  }
+
+  function grid2(a, b) {
+    return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">${a}${b}</div>`;
+  }
+  function grid3(a, b, c) {
+    return `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">${a}${b}${c}</div>`;
+  }
+
+  // ── 3. Monta o HTML completo do PDF ───────────────────────
+  const dataHoje = new Date().toLocaleDateString('pt-BR');
+
+  const htmlPDF = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Encaminhamento ao AEE</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; font-size: 11px; color: #222; background: white; padding: 24px; }
+  @page { margin: 16mm 14mm; size: A4; }
+  @media print { body { padding: 0; } .no-print { display: none !important; } }
+</style>
+</head>
+<body>
+
+  <div style="border-bottom:3px solid #C04A00;padding-bottom:14px;margin-bottom:20px;">
+    <div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#C04A00;margin-bottom:4px;">Educação Especial Inclusiva · AEE</div>
+    <h1 style="font-size:17px;color:#C04A00;font-family:Georgia,serif;margin-bottom:4px;">Encaminhamento ao AEE — Avaliação Pedagógica do Professor Regente</h1>
+    <p style="font-size:8.5px;color:#888;">Fundamentado na LBI (Lei nº 13.146/2015) e no Decreto nº 12.686/2025 (atualizado pelo Decreto nº 12.773/2025).<br>
+    Documento gerado em ${dataHoje} para subsidiar o Estudo de Caso e a elaboração do PAEE/PEI.</p>
+  </div>
+
+  ${secao('01 · Identificação — Escola e Encaminhamento',
+    grid2(
+      campo('Nome da escola', gi(s1_inputs,0)) + campo('Data de preenchimento', gi(s1_inputs,2)),
+      campo('Município / Estado', gi(s1_inputs,1)) + campo('Período de observação', gi(s1_inputs,3))
+    )
+  )}
+
+  ${secao('02 · Identificação — Professor Regente',
+    grid3(
+      campo('Nome completo', gi(s1_inputs,4)),
+      campo('Componente(s) curricular(es)', gi(s1_inputs,5)),
+      campo('Turma / Ano', gi(s1_inputs,6))
+    )
+  )}
+
+  ${secao('03 · Identificação — Estudante',
+    grid3(
+      campo('Nome completo', gi(s1_inputs,7)),
+      campo('Data de nascimento', gi(s1_inputs,8)),
+      campo('Idade atual', gi(s1_inputs,9))
+    ) +
+    grid3(
+      campo('Condição / Deficiência', gi(s1_inputs,10)),
+      campo('Tempo na escola atual', gi(s1_inputs,11)),
+      campo('Recebe AEE atualmente?', gi(s1_inputs,12))
+    ) +
+    campo('Observações iniciais', gi(s1_tas,0), 3)
+  )}
+
+  ${secao('04 · Comunicação e Linguagem',
+    campo('Como o estudante se comunica', gi(s2_tas,0), 3) +
+    nivelBox('Compreensão de instruções coletivas', 'ng-com1') +
+    campo('Observações complementares', gi(s2_tas,1), 3)
+  )}
+
+  ${secao('05 · Interação Social e Pertencimento',
+    campo('Como se relaciona com os colegas', gi(s2_tas,2), 3) +
+    nivelBox('Participação em atividades em grupo', 'ng-soc1') +
+    campo('Sinais de pertencimento ou exclusão', gi(s2_tas,3), 2)
+  )}
+
+  ${secao('06 · Autonomia e Funcionalidade',
+    nivelBox('Realiza rotinas escolares de forma independente?', 'ng-aut1') +
+    campo('Necessidades de apoio físico, de cuidado ou de comunicação', gi(s2_tas,4), 3)
+  )}
+
+  ${secao('07 · Atenção, Engajamento e Motivação',
+    campo('Tempo aproximado de atenção sustentada', gi(s2_inputs,0), 1) +
+    campo('Atividades e temas que geram maior engajamento', gi(s2_tas,5), 3) +
+    campo('Como responde ao elogio e à correção', gi(s2_tas,6), 2)
+  )}
+
+  ${secao('08 · Desempenho em Leitura',
+    nivelBox('Nível geral de leitura', 'ng-lei1') +
+    nivelBox('Compreensão leitora', 'ng-lei2') +
+    campo('Observações sobre leitura', gi(s3_tas,0), 3)
+  )}
+
+  ${secao('09 · Desempenho em Escrita',
+    nivelBox('Hipótese / nível de escrita', 'ng-esc1') +
+    nivelBox('Produção textual', 'ng-esc2') +
+    campo('Observações sobre escrita', gi(s3_tas,1), 3)
+  )}
+
+  ${secao('10 · Desempenho em Matemática',
+    nivelBox('Operações matemáticas', 'ng-mat1') +
+    nivelBox('Resolução de problemas', 'ng-mat2') +
+    campo('Observações sobre matemática', gi(s3_tas,2), 3)
+  )}
+
+  ${secao('11 · Outras Áreas e Pontos Fortes',
+    campo('Participação nas demais disciplinas', gi(s3_tas,3), 3) +
+    campo('Pontos fortes e interesses do estudante', gi(s3_tas,4), 3)
+  )}
+
+  ${secao('12 · Comportamento e Autorregulação',
+    nivelBox('Frequência de comportamentos que interferem na aprendizagem', 'ng-comp1') +
+    campo('Descrição dos comportamentos observados', gi(s4_tas,0), 4) +
+    campo('Contextos que desencadeiam comportamentos', gi(s4_tas,1), 2) +
+    campo('Estratégias de autorregulação que o estudante já usa', gi(s4_tas,2), 2) +
+    grid2(
+      campo('Possui BIP?', gi(s4_inputs,0)),
+      campo('O que tem funcionado para prevenir comportamentos', gi(s4_tas,3), 2)
+    )
+  )}
+
+  ${secao('13 · Acomodações Realizadas e Resultados',
+    campo('Acomodações já utilizadas', acomMarcados.length ? acomMarcados.map(m => '✓ ' + m).join('\n') : '(nenhuma marcada)', Math.max(acomMarcados.length, 1)) +
+    campo('Resultados das acomodações', gi(s5_tas,0), 3) +
+    campo('O que definitivamente NÃO funcionou e por quê', gi(s5_tas,1), 3) +
+    campo('Canal de aprendizagem preferencial', canalMarcado, 1)
+  )}
+
+  ${secao('14 · Síntese — Pontos Fortes e Barreiras',
+    campo('Principais pontos fortes e potencialidades', gi(s6_tas,0), 4) +
+    campo('Principais barreiras para aprendizagem e participação', gi(s6_tas,1), 4) +
+    campo('Questões que ainda não consigo compreender ou manejar bem', gi(s6_tas,2), 3)
+  )}
+
+  ${secao('15 · Hipóteses, Necessidades e Metas Sugeridas',
+    campo('Recursos e apoios necessários na sala de aula regular', gi(s6_tas,3), 3) +
+    grid2(
+      campo('Necessidade identificada de profissional de apoio escolar?', gi(s6_inputs,0)),
+      campo('Metas sugeridas para o PEI', gi(s6_tas,4), 4)
+    )
+  )}
+
+  ${secao('16 · Assinatura e Data',
+    grid3(
+      campo('Nome do professor regente', gi(s6_inputs,1)),
+      campo('Data de conclusão', gi(s6_inputs,2)),
+      campo('Assinatura', '')
+    ) +
+    '<div style="margin-top:20px;padding-top:14px;border-top:1px solid #EEE;"><p style="font-size:8px;color:#AAA;">Este documento é de uso institucional. Elaborado com base na Lei Brasileira de Inclusão (Lei nº 13.146/2015), no Decreto nº 12.686/2025 e no Decreto nº 12.773/2025.</p></div>'
+  )}
+
+  <div class="no-print" style="position:fixed;bottom:20px;right:20px;display:flex;gap:8px;">
+    <button onclick="window.print()" style="background:#C04A00;color:white;border:none;padding:12px 24px;border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;">🖨 Imprimir / Salvar PDF</button>
+    <button onclick="window.close()" style="background:#666;color:white;border:none;padding:12px 20px;border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;">✕ Fechar</button>
+  </div>
+
+</body>
+</html>`;
+
+  // ── 4. DOWNLOAD DIRETO ────────────────────────────────────
+  // window.open() é bloqueado em iframes (ex.: Claude.ai).
+  // A solução é criar um link <a download> e clicar nele:
+  // o navegador faz o download do arquivo HTML, o usuário
+  // abre no browser e usa Ctrl+P / Imprimir para salvar como PDF.
+  const blob = new Blob([htmlPDF], { type: 'text/html;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'encaminhamento-aee.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+  // Avisa o usuário como imprimir
+  setTimeout(() => {
+    alert('✅ Arquivo baixado!\n\nAbra o arquivo "encaminhamento-aee.html" no seu navegador e use Ctrl+P (ou ⌘P no Mac) para imprimir ou salvar como PDF.');
+  }, 300);
+}
+</script>
+</body>
+</html>
